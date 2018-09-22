@@ -1,4 +1,4 @@
-package jws
+package jwc
 
 import (
 	"crypto"
@@ -18,7 +18,7 @@ func TestRSAPublicJWK(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 	publicKey := privateKey.PublicKey
-	publicJWK, err := RSAToPublicJWK(&publicKey, JWKID("valid"), &expirationTime)
+	publicJWK, err := RSAToPublicJWK(&publicKey, JWKID("valid"), RSA15, &expirationTime)
 	if err != nil {
 		t.Errorf("%v", err)
 	}
@@ -31,7 +31,7 @@ func TestRSAPublicJWK(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 	fakePublicKey := fakePrivateKey.PublicKey
-	fakePublicJWK, err := RSAToPublicJWK(&fakePublicKey, JWKID("fake"), &expirationTime)
+	fakePublicJWK, err := RSAToPublicJWK(&fakePublicKey, JWKID("fake"), RSA15, &expirationTime)
 	if err != nil {
 		t.Errorf("%v", err)
 	}
@@ -71,7 +71,7 @@ func TestRSAPrivateJWK(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 	publicKey := privateKey.PublicKey
-	privateJWK, err := RSAToPrivateJWK(privateKey, JWKID("test"), &expirationTime)
+	privateJWK, err := RSAToPrivateJWK(privateKey, JWKID("test"), RSA15, &expirationTime)
 	if err != nil {
 		t.Errorf("%v", err)
 	}
@@ -84,7 +84,7 @@ func TestRSAPrivateJWK(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 	fakePublicKey := fakePrivateKey.PublicKey
-	fakePrivateJWK, err := RSAToPrivateJWK(fakePrivateKey, JWKID("test"), &expirationTime)
+	fakePrivateJWK, err := RSAToPrivateJWK(fakePrivateKey, JWKID("test"), RSA15, &expirationTime)
 	if err != nil {
 		t.Errorf("%v", err)
 	}

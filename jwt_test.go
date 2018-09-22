@@ -1,4 +1,4 @@
-package jws
+package jwc
 
 import (
 	"crypto/rand"
@@ -39,7 +39,7 @@ func TestJWT(t *testing.T) {
 				"did":  "deviceID",
 				"sco":  "offline",
 				"cc":   "dummyCodeChallenge",
-				"ccm":  S256,
+				"ccm":  "S256",
 			},
 		}},
 		{JWTPayload{
@@ -56,12 +56,12 @@ func TestJWT(t *testing.T) {
 				"did":  "deviceID",
 				"sco":  "offline",
 				"cc":   "dummyCodeChallenge",
-				"ccm":  S256,
+				"ccm":  "S256",
 			},
 		}},
 	}
 	for _, testCase := range cases {
-		jwt := NewJWT(testCase.payload)
+		jwt := NewJWT(testCase.payload, RS256)
 		encoded, err := jwt.Encode("test", privateKey)
 		if err != nil {
 			panic(err)
@@ -92,8 +92,8 @@ func TestJWT(t *testing.T) {
 }
 
 func testCompareJWT(input, decoded JWT, t *testing.T) {
-	if input.Header.Algo != decoded.Header.Algo {
-		t.Errorf("expected %v got %v", input.Header.Algo, decoded.Header.Algo)
+	if input.Header.Algorithm != decoded.Header.Algorithm {
+		t.Errorf("expected %v got %v", input.Header.Algorithm, decoded.Header.Algorithm)
 	}
 	if input.Header.Type != decoded.Header.Type {
 		t.Errorf("expected %v got %v", input.Header.Type, decoded.Header.Type)

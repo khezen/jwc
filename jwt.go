@@ -1,4 +1,4 @@
-package jws
+package jwc
 
 // https://tools.ietf.org/html/rfc7519
 
@@ -17,22 +17,24 @@ import (
 const (
 	// JWTType - jwt type
 	JWTType = "JWT"
-	// S256 - SHA-256
-	S256 = "S256"
 )
 
-// Base64Encoding - encoding used to encode and decode tokens
-var Base64Encoding = base64.URLEncoding.WithPadding(base64.NoPadding)
-
-// ErrJWTUnparsable -
-var ErrJWTUnparsable = errors.New("ErrJWTUnparsable")
+var (
+	// Base64Encoding - encoding used to encode and decode tokens
+	Base64Encoding = base64.URLEncoding.WithPadding(base64.NoPadding)
+	// ErrJWTUnparsable -
+	ErrJWTUnparsable = errors.New("ErrJWTUnparsable")
+)
 
 // NewJWT - creates a new JWT from the payload
-func NewJWT(payload JWTPayload) *JWT {
+func NewJWT(payload JWTPayload, signAlgo Algorithm) *JWT {
+	if signAlgo != RS256 && signAlgo != PS256 {
+		panic(ErrUnsupportedAlgorithm)
+	}
 	return &JWT{
 		Header: JWTHeader{
-			Algo: RS256,
-			Type: JWTType,
+			Algorithm: signAlgo,
+			Type:      JWTType,
 		},
 		Payload: payload,
 	}
@@ -49,9 +51,9 @@ type JWT struct {
 
 // JWTHeader JWT header
 type JWTHeader struct {
-	Algo      string `json:"alg"`
-	Type      string `json:"typ"`
-	SignKeyID JWKID  `json:"kid"`
+	Algorithm Algorithm `json:"alg"`
+	Type      string    `json:"typ"`
+	SignKeyID JWKID     `json:"kid"`
 }
 
 // JWTPayload - JWT payload
@@ -88,9 +90,19 @@ func (jwt *JWT) Encode(signKeyID JWKID, privateKey *rsa.PrivateKey) (string, err
 	payloadBase64 := Base64Encoding.EncodeToString(payloadJSON)
 	plainPart := fmt.Sprintf("%s.%s", headerBase64, payloadBase64)
 	hash := sha256.Sum256([]byte(plainPart))
-	signature, err := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA256, hash[:])
-	if err != nil {
-		return "", err
+	var signature []byte
+	switch jwt.Header.Algorithm {
+	case RS256:
+		signature, err = rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA256, hash[:])
+		if err != nil {
+			return "", err
+		}
+		break
+	case PS256:
+		signature, err = rsa.SignPSS(rand.Reader, privateKey, crypto.SHA256, hash[:], nil)
+		if err != nil {
+			return "", err
+		}
 	}
 	signatureBase64 := Base64Encoding.EncodeToString(signature)
 	encoded := fmt.Sprintf("%s.%s", plainPart, signatureBase64)
@@ -114,16 +126,27 @@ func VerifyJWT(jwtStr string, publicKey *rsa.PublicKey) error {
 	if err != nil {
 		return err
 	}
-	return verifyJWT(headerBase64, payloadBase64, signatureBase64, publicKey)
+	jwt, err := decodeJWT(headerBase64, payloadBase64)
+	if err != nil {
+		return err
+	}
+	return verifyJWT(headerBase64, payloadBase64, signatureBase64, publicKey, jwt.Header.Algorithm)
 }
-func verifyJWT(headerBase64, payloadBase64, signatureBase64 string, publicKey *rsa.PublicKey) error {
+func verifyJWT(headerBase64, payloadBase64, signatureBase64 string, publicKey *rsa.PublicKey, algo Algorithm) error {
 	plainPart := fmt.Sprintf("%s.%s", headerBase64, payloadBase64)
 	hash := sha256.Sum256([]byte(plainPart))
 	signature, err := Base64Encoding.DecodeString(signatureBase64)
 	if err != nil {
 		return err
 	}
-	return rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, hash[:], signature)
+	switch algo {
+	case RS256:
+		return rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, hash[:], signature)
+	case PS256:
+		return rsa.VerifyPSS(publicKey, crypto.SHA256, hash[:], signature, nil)
+	default:
+		return ErrUnsupportedAlgorithm
+	}
 }
 
 // DecodeJWT - parse a base64 string into a jwt
@@ -166,9 +189,13 @@ func DecodeAndVerifyJWT(jwtStr string, publicKey *rsa.PublicKey) (*JWT, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = verifyJWT(headerBase64, payloadBase64, signatureBase64, publicKey)
+	jwt, err := decodeJWT(headerBase64, payloadBase64)
 	if err != nil {
 		return nil, err
 	}
-	return decodeJWT(headerBase64, payloadBase64)
+	err = verifyJWT(headerBase64, payloadBase64, signatureBase64, publicKey, jwt.Header.Algorithm)
+	if err != nil {
+		return nil, err
+	}
+	return jwt, nil
 }

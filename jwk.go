@@ -1,4 +1,4 @@
-package jws
+package jwc
 
 import (
 	"crypto/rsa"
@@ -13,24 +13,13 @@ import (
 
 // https://tools.ietf.org/html/rfc7517
 
-const (
-	// RSA -
-	RSA = "RSA"
-	// RS256 - RSASSA-PKCS1-v1_5 + SHA256
-	RS256 = "RS256"
-	// Signing - JWK is intended to be used for signature
-	Signing Usage = "sig"
-	// Encryption - JWK is intended to be used for encryption
-	Encryption Usage = "enc"
-)
+// RSA -
+const RSA = "RSA"
 
 var (
 	// ErrValueOutOfRangeParsingBigInt -
 	ErrValueOutOfRangeParsingBigInt = errors.New("ErrValueOutOfRangeParsingBigInt")
 )
-
-// Usage -
-type Usage string
 
 // JWKID - identify a specific jwk in a set
 type JWKID string
@@ -40,7 +29,7 @@ type JWK struct {
 	Type                   string     `json:"kty"`
 	ID                     JWKID      `json:"kid"`
 	Usage                  Usage      `json:"use,omitempty"`
-	Algorithm              string     `json:"alg,omitempty"`
+	Algorithm              Algorithm  `json:"alg,omitempty"`
 	CertificateChainBase64 []string   `json:"x5c,omitempty"`
 	ThumbprintBase64       string     `json:"x5t,omitempty"`
 	ExpirationTime         *time.Time `json:"exp,omitempty"`
@@ -54,7 +43,7 @@ type RSAPublicJWK struct {
 }
 
 // RSAToPublicJWK - takes rsa public key and returns it as JWK
-func RSAToPublicJWK(publicKey *rsa.PublicKey, jwkID JWKID, expirationTime *time.Time) (*RSAPublicJWK, error) {
+func RSAToPublicJWK(publicKey *rsa.PublicKey, jwkID JWKID, algo Algorithm, expirationTime *time.Time) (*RSAPublicJWK, error) {
 	publicX509DER, err := x509.MarshalPKIXPublicKey(publicKey)
 	if err != nil {
 		return nil, err
@@ -64,10 +53,20 @@ func RSAToPublicJWK(publicKey *rsa.PublicKey, jwkID JWKID, expirationTime *time.
 	publicThumbprintBase64 := base64.StdEncoding.EncodeToString(publicThumbprint[:])
 	modulusBase64 := base64.StdEncoding.EncodeToString(publicKey.N.Bytes())
 	publicExponentBase64 := base64.StdEncoding.EncodeToString([]byte(strconv.Itoa(publicKey.E)))
+	var usage Usage
+	switch algo {
+	case RS256, PS256:
+		usage = Signing
+		break
+	case ROAEP:
+		usage = Encryption
+	}
 	publicJWK := RSAPublicJWK{
 		JWK: JWK{
-			ID:   jwkID,
-			Type: RSA,
+			ID:        jwkID,
+			Type:      RSA,
+			Algorithm: algo,
+			Usage:     usage,
 			CertificateChainBase64: []string{publicX509DERBase64},
 			ThumbprintBase64:       publicThumbprintBase64,
 			ExpirationTime:         expirationTime,
@@ -133,7 +132,7 @@ func (jwk *RSAPrivateJWK) PublicKey() *RSAPublicJWK {
 }
 
 // RSAToPrivateJWK - takes rsa private key and returns it as JWK
-func RSAToPrivateJWK(privateKey *rsa.PrivateKey, jwkID JWKID, expirationTime *time.Time) (*RSAPrivateJWK, error) {
+func RSAToPrivateJWK(privateKey *rsa.PrivateKey, jwkID JWKID, algo Algorithm, expirationTime *time.Time) (*RSAPrivateJWK, error) {
 	privateX509DER := x509.MarshalPKCS1PrivateKey(privateKey)
 	privateX509DERBase64 := base64.StdEncoding.EncodeToString(privateX509DER)
 	privateThumbprint := sha1.Sum(privateX509DER)
@@ -149,12 +148,20 @@ func RSAToPrivateJWK(privateKey *rsa.PrivateKey, jwkID JWKID, expirationTime *ti
 	privateExpModFirstPrimeMinusOneBase64 := base64.StdEncoding.EncodeToString(privateKey.Precomputed.Dp.Bytes())
 	privateExpModSecondPrimeMinusOneBase64 := base64.StdEncoding.EncodeToString(privateKey.Precomputed.Dq.Bytes())
 	secondPrimeInverseModFirstPrimeBase64 := base64.StdEncoding.EncodeToString(privateKey.Precomputed.Qinv.Bytes())
+	var usage Usage
+	switch algo {
+	case RS256, PS256:
+		usage = Signing
+		break
+	case ROAEP:
+		usage = Encryption
+	}
 	privateJWK := RSAPrivateJWK{
 		JWK: JWK{
 			ID:        jwkID,
 			Type:      RSA,
-			Algorithm: RS256,
-			Usage:     Signing,
+			Algorithm: algo,
+			Usage:     usage,
 			CertificateChainBase64: []string{privateX509DERBase64},
 			ThumbprintBase64:       privateThumbprintBase64,
 			ExpirationTime:         expirationTime,
