@@ -74,11 +74,11 @@ func TestJWT(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
-		_, err = DecodeAndVerifyJWT(encoded, &fakePublicKey)
+		_, err = DecodeVerifyJWT(encoded, &fakePublicKey)
 		if err == nil {
 			t.Errorf("expecting err != nil")
 		}
-		decoded, err := DecodeAndVerifyJWT(encoded, &publicKey)
+		decoded, err := DecodeVerifyJWT(encoded, &publicKey)
 		if err != nil {
 			panic(err)
 		}

@@ -183,8 +183,8 @@ func decodeJWT(headerBase64, payloadBase64 string) (*JWT, error) {
 	return &jwt, nil
 }
 
-// DecodeAndVerifyJWT - parse a base64 string into a jwt
-func DecodeAndVerifyJWT(jwtStr string, publicKey *rsa.PublicKey) (*JWT, error) {
+// DecodeVerifyJWT - parse a base64 string into a jwt
+func DecodeVerifyJWT(jwtStr string, publicKey *rsa.PublicKey) (*JWT, error) {
 	headerBase64, payloadBase64, signatureBase64, err := ExtractJWTParts(jwtStr)
 	if err != nil {
 		return nil, err
