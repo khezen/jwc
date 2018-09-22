@@ -24,8 +24,8 @@ var (
 type JWK struct {
 	Type                   string     `json:"kty"`
 	ID                     JWKID      `json:"kid"`
-	Usage                  Usage      `json:"use,omitempty"`
-	Algorithm              Algorithm  `json:"alg,omitempty"`
+	Usage                  Usage      `json:"use"`
+	Algorithm              Algorithm  `json:"alg"`
 	CertificateChainBase64 []string   `json:"x5c,omitempty"`
 	ThumbprintBase64       string     `json:"x5t,omitempty"`
 	ExpirationTime         *time.Time `json:"exp,omitempty"`
