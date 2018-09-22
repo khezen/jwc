@@ -1,4 +1,4 @@
-[![GoDoc](https://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://godoc.org/github.com/khezen/jws)
+[![GoDoc](https://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://godoc.org/github.com/khezen/jwc)
 
 * jws - JSON Web Signature
   * RSASSA-PSS + SHA256, recommended +
