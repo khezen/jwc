@@ -16,12 +16,12 @@ import (
 
 const (
 	// JWTType - jwt type
-	JWTType = "JWT"
+	jwtType = "JWT"
 )
 
 var (
-	// Base64Encoding - encoding used to encode and decode tokens
-	Base64Encoding = base64.URLEncoding.WithPadding(base64.NoPadding)
+	// JWTBase64Encoding - encoding used to encode and decode tokens
+	JWTBase64Encoding = base64.URLEncoding.WithPadding(base64.NoPadding)
 	// ErrJWTUnparsable -
 	ErrJWTUnparsable = errors.New("ErrJWTUnparsable")
 )
@@ -34,7 +34,7 @@ func NewJWT(payload JWTPayload, signAlgo Algorithm) *JWT {
 	return &JWT{
 		Header: JWTHeader{
 			Algorithm: signAlgo,
-			Type:      JWTType,
+			Type:      jwtType,
 		},
 		Payload: payload,
 	}
@@ -82,12 +82,12 @@ func (jwt *JWT) Encode(signKeyID JWKID, privateKey *rsa.PrivateKey) (string, err
 	if err != nil {
 		return "", err
 	}
-	headerBase64 := Base64Encoding.EncodeToString(headerJSON)
+	headerBase64 := JWTBase64Encoding.EncodeToString(headerJSON)
 	payloadJSON, err := json.Marshal(jwt.Payload)
 	if err != nil {
 		return "", err
 	}
-	payloadBase64 := Base64Encoding.EncodeToString(payloadJSON)
+	payloadBase64 := JWTBase64Encoding.EncodeToString(payloadJSON)
 	plainPart := fmt.Sprintf("%s.%s", headerBase64, payloadBase64)
 	hash := sha256.Sum256([]byte(plainPart))
 	var signature []byte
@@ -104,7 +104,7 @@ func (jwt *JWT) Encode(signKeyID JWKID, privateKey *rsa.PrivateKey) (string, err
 			return "", err
 		}
 	}
-	signatureBase64 := Base64Encoding.EncodeToString(signature)
+	signatureBase64 := JWTBase64Encoding.EncodeToString(signature)
 	encoded := fmt.Sprintf("%s.%s", plainPart, signatureBase64)
 	return encoded, nil
 }
@@ -135,7 +135,7 @@ func VerifyJWT(jwtStr string, publicKey *rsa.PublicKey) error {
 func verifyJWT(headerBase64, payloadBase64, signatureBase64 string, publicKey *rsa.PublicKey, algo Algorithm) error {
 	plainPart := fmt.Sprintf("%s.%s", headerBase64, payloadBase64)
 	hash := sha256.Sum256([]byte(plainPart))
-	signature, err := Base64Encoding.DecodeString(signatureBase64)
+	signature, err := JWTBase64Encoding.DecodeString(signatureBase64)
 	if err != nil {
 		return err
 	}
@@ -158,11 +158,11 @@ func DecodeJWT(jwtStr string) (*JWT, error) {
 	return decodeJWT(headerBase64, payloadBase64)
 }
 func decodeJWT(headerBase64, payloadBase64 string) (*JWT, error) {
-	headerJSON, err := Base64Encoding.DecodeString(headerBase64)
+	headerJSON, err := JWTBase64Encoding.DecodeString(headerBase64)
 	if err != nil {
 		return nil, err
 	}
-	payloadJSON, err := Base64Encoding.DecodeString(payloadBase64)
+	payloadJSON, err := JWTBase64Encoding.DecodeString(payloadBase64)
 	if err != nil {
 		return nil, err
 	}

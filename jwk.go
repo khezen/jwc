@@ -13,16 +13,12 @@ import (
 
 // https://tools.ietf.org/html/rfc7517
 
-// RSA -
-const RSA = "RSA"
+const rsaType = "RSA"
 
 var (
-	// ErrValueOutOfRangeParsingBigInt -
-	ErrValueOutOfRangeParsingBigInt = errors.New("ErrValueOutOfRangeParsingBigInt")
+	// ErrJWKValueOutOfRangeParsingBigInt -
+	ErrJWKValueOutOfRangeParsingBigInt = errors.New("ErrJWKValueOutOfRangeParsingBigInt")
 )
-
-// JWKID - identify a specific jwk in a set
-type JWKID string
 
 // JWK - JSON Web Key
 type JWK struct {
@@ -34,6 +30,9 @@ type JWK struct {
 	ThumbprintBase64       string     `json:"x5t,omitempty"`
 	ExpirationTime         *time.Time `json:"exp,omitempty"`
 }
+
+// JWKID - identify a specific jwk in a set
+type JWKID string
 
 // RSAPublicJWK - rsa public JSON web key
 type RSAPublicJWK struct {
@@ -64,7 +63,7 @@ func RSAToPublicJWK(publicKey *rsa.PublicKey, jwkID JWKID, algo Algorithm, expir
 	publicJWK := RSAPublicJWK{
 		JWK: JWK{
 			ID:        jwkID,
-			Type:      RSA,
+			Type:      rsaType,
 			Algorithm: algo,
 			Usage:     usage,
 			CertificateChainBase64: []string{publicX509DERBase64},
@@ -159,7 +158,7 @@ func RSAToPrivateJWK(privateKey *rsa.PrivateKey, jwkID JWKID, algo Algorithm, ex
 	privateJWK := RSAPrivateJWK{
 		JWK: JWK{
 			ID:        jwkID,
-			Type:      RSA,
+			Type:      rsaType,
 			Algorithm: algo,
 			Usage:     usage,
 			CertificateChainBase64: []string{privateX509DERBase64},

@@ -26,5 +26,7 @@ const (
 	RSA15 Algorithm = "RSA1_5"
 )
 
-// ErrUnsupportedAlgorithm -
-var ErrUnsupportedAlgorithm = errors.New("ErrUnsupportedAlgorithm")
+var (
+	// ErrUnsupportedAlgorithm -
+	ErrUnsupportedAlgorithm = errors.New("ErrUnsupportedAlgorithm")
+)
