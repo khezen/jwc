@@ -1,3 +1,0 @@
-package jwc
-
-var ()
