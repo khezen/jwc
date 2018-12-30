@@ -152,7 +152,7 @@ func RSAToPrivateJWK(privateKey *rsa.PrivateKey, jwkID JWKID, algo Algorithm, ex
 	case RS256, PS256:
 		usage = Signing
 		break
-	case ROAEP:
+	case ROAEP, RSA15:
 		usage = Encryption
 	}
 	privateJWK := RSAPrivateJWK{
