@@ -1,5 +1,7 @@
 package jwc
 
+// https://tools.ietf.org/html/rfc7517
+
 import (
 	"crypto/rsa"
 	"crypto/sha1"
@@ -10,8 +12,6 @@ import (
 	"strconv"
 	"time"
 )
-
-// https://tools.ietf.org/html/rfc7517
 
 const rsaType = "RSA"
 
