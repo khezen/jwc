@@ -57,7 +57,7 @@ func RSAToPublicJWK(publicKey *rsa.PublicKey, jwkID JWKID, algo Algorithm, expir
 	case RS256, PS256:
 		usage = Signing
 		break
-	case ROAEP:
+	case ROAEP, RSA15:
 		usage = Encryption
 	}
 	publicJWK := RSAPublicJWK{
