@@ -58,39 +58,40 @@ func TestJWT(t *testing.T) {
 				"cc":   "dummyCodeChallenge",
 				"ccm":  "S256",
 			},
-			{JWTPayload{
-				RegisteredClaims{
-					IssuedAtTimestamp:   nowUnix,
-					ExpirationTimestamp: expUnix,
-					Issuer:              "github.com/khezen/jws/jwt_test.go",
-					Subject:             "test",
-				},
-				PrivateClaims{
-					"tid":  "tokenID",
-					"cid":  "customerID",
-					"clid": "android.myapp.com",
-					"did":  "deviceID",
-					"sco":  "offline",
-					"cc":   "dummyCodeChallenge",
-					"ccm":  "PS256",
-				},
-			}},
-			{JWTPayload{
-				RegisteredClaims{
-					IssuedAtTimestamp:   nowUnix,
-					ExpirationTimestamp: expUnix,
-					Issuer:              "github.com/khezen/jws/jwt_test.go",
-					Subject:             "test",
-				},
-				PrivateClaims{
-					"tid":  "tokenID",
-					"cid":  "customerID",
-					"clid": "ios.myapp.com",
-					"did":  "deviceID",
-					"sco":  "offline",
-					"cc":   "dummyCodeChallenge",
-					"ccm":  "PS256",
-				},
+		}},
+		{JWTPayload{
+			RegisteredClaims{
+				IssuedAtTimestamp:   nowUnix,
+				ExpirationTimestamp: expUnix,
+				Issuer:              "github.com/khezen/jws/jwt_test.go",
+				Subject:             "test",
+			},
+			PrivateClaims{
+				"tid":  "tokenID",
+				"cid":  "customerID",
+				"clid": "android.myapp.com",
+				"did":  "deviceID",
+				"sco":  "offline",
+				"cc":   "dummyCodeChallenge",
+				"ccm":  "PS256",
+			},
+		}},
+		{JWTPayload{
+			RegisteredClaims{
+				IssuedAtTimestamp:   nowUnix,
+				ExpirationTimestamp: expUnix,
+				Issuer:              "github.com/khezen/jws/jwt_test.go",
+				Subject:             "test",
+			},
+			PrivateClaims{
+				"tid":  "tokenID",
+				"cid":  "customerID",
+				"clid": "ios.myapp.com",
+				"did":  "deviceID",
+				"sco":  "offline",
+				"cc":   "dummyCodeChallenge",
+				"ccm":  "PS256",
+			},
 		}},
 	}
 	for _, testCase := range cases {
