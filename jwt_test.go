@@ -108,7 +108,7 @@ func TestJWT(t *testing.T) {
 		},
 	}
 	for _, testCase := range cases {
-		jwt := NewJWT(testCase.payload, RS256)
+		jwt := NewJWT(testCase.payload, testCase.alg)
 		encoded, err := jwt.Encode("test", privateKey)
 		if err != nil {
 			panic(err)
