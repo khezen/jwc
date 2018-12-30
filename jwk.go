@@ -62,13 +62,13 @@ func RSAToPublicJWK(publicKey *rsa.PublicKey, jwkID JWKID, algo Algorithm, expir
 	}
 	publicJWK := RSAPublicJWK{
 		JWK: JWK{
-			ID:        jwkID,
-			Type:      rsaType,
-			Algorithm: algo,
-			Usage:     usage,
 			CertificateChainBase64: []string{publicX509DERBase64},
 			ThumbprintBase64:       publicThumbprintBase64,
 			ExpirationTime:         expirationTime,
+			ID:                     jwkID,
+			Type:                   rsaType,
+			Algorithm:              algo,
+			Usage:                  usage,
 		},
 		ModulusBase64:        modulusBase64,
 		PublicExponentBase64: publicExponentBase64,
@@ -157,13 +157,13 @@ func RSAToPrivateJWK(privateKey *rsa.PrivateKey, jwkID JWKID, algo Algorithm, ex
 	}
 	privateJWK := RSAPrivateJWK{
 		JWK: JWK{
-			ID:        jwkID,
-			Type:      rsaType,
-			Algorithm: algo,
-			Usage:     usage,
 			CertificateChainBase64: []string{privateX509DERBase64},
 			ThumbprintBase64:       privateThumbprintBase64,
 			ExpirationTime:         expirationTime,
+			ID:                     jwkID,
+			Type:                   rsaType,
+			Algorithm:              algo,
+			Usage:                  usage,
 		},
 		ModulusBase64:           modulusBase64,
 		PublicExponentBase64:    publicExponentBase64,
