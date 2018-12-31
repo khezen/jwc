@@ -108,7 +108,10 @@ func TestJWT(t *testing.T) {
 		},
 	}
 	for _, testCase := range cases {
-		jwt := NewJWT(testCase.payload, testCase.alg)
+		jwt, err := NewJWT(testCase.payload, testCase.alg)
+		if err != nil {
+			panic(err)
+		}
 		encoded, err := jwt.Encode("test", privateKey)
 		if err != nil {
 			panic(err)
@@ -169,5 +172,69 @@ func testCompareJWT(input, decoded JWT, t *testing.T) {
 		if input.Payload.PrivateClaims[k] != decoded.Payload.PrivateClaims[k] {
 			t.Errorf("Expected %v, got %v", decoded.Payload.PrivateClaims[k], input.Payload.PrivateClaims[k])
 		}
+	}
+}
+
+func TestErrCases(t *testing.T) {
+	_, _, _, err := ExtractJWTParts("abcdefjhijklmnopqrstuvwxyz")
+	if err == nil {
+		t.Errorf("expected %v, got nil", ErrJWTUnparsable)
+	}
+	_, err = NewJWT(
+		JWTPayload{
+			RegisteredClaims{
+				IssuedAtTimestamp: time.Now().UTC().Unix(),
+				Issuer:            "github.com/khezen/jws/jwt_test.go",
+				Subject:           "test",
+			},
+			PrivateClaims{
+				"tid":  "tokenID",
+				"cid":  "customerID",
+				"clid": "ios.myapp.com",
+				"did":  "deviceID",
+				"sco":  "offline",
+				"cc":   "dummyCodeChallenge",
+				"ccm":  "S256",
+			},
+		},
+		"UnsupportedAlgo",
+	)
+	if err == nil {
+		t.Errorf("expected %v, got nil", ErrUnsupportedAlgorithm)
+	}
+	jwt, err := NewJWT(
+		JWTPayload{
+			RegisteredClaims{
+				IssuedAtTimestamp: time.Now().UTC().Unix(),
+				Issuer:            "github.com/khezen/jws/jwt_test.go",
+				Subject:           "test",
+			},
+			PrivateClaims{
+				"tid":  "tokenID",
+				"cid":  "customerID",
+				"clid": "ios.myapp.com",
+				"did":  "deviceID",
+				"sco":  "offline",
+				"cc":   "dummyCodeChallenge",
+				"ccm":  "S256",
+			},
+		},
+		PS256,
+	)
+	if err != nil {
+		panic(err)
+	}
+	jwt.Header.Algorithm = "UnsupportedAlgo"
+	privateKey, err := rsa.GenerateKey(rand.Reader, 1024)
+	if err != nil {
+		panic(err)
+	}
+	jwtStr, err := jwt.Encode("test", privateKey)
+	if err != nil {
+		panic(err)
+	}
+	_, err = DecodeVerifyJWT(jwtStr, &privateKey.PublicKey)
+	if err == nil {
+		t.Errorf("expected %v, got nil", ErrUnsupportedAlgorithm)
 	}
 }

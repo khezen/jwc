@@ -27,9 +27,9 @@ var (
 )
 
 // NewJWT - creates a new JWT from the payload
-func NewJWT(payload JWTPayload, signAlgo Algorithm) *JWT {
+func NewJWT(payload JWTPayload, signAlgo Algorithm) (*JWT, error) {
 	if signAlgo != RS256 && signAlgo != PS256 {
-		panic(ErrUnsupportedAlgorithm)
+		return nil, ErrUnsupportedAlgorithm
 	}
 	return &JWT{
 		Header: JWTHeader{
@@ -37,7 +37,7 @@ func NewJWT(payload JWTPayload, signAlgo Algorithm) *JWT {
 			Type:      jwtType,
 		},
 		Payload: payload,
-	}
+	}, nil
 }
 
 // TokenID -
