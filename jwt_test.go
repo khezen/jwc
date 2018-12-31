@@ -175,7 +175,7 @@ func testCompareJWT(input, decoded JWT, t *testing.T) {
 	}
 }
 
-func TestErrCases(t *testing.T) {
+func TestJWTErrCases(t *testing.T) {
 	_, _, _, err := ExtractJWTParts("abcdefjhijklmnopqrstuvwxyz")
 	if err == nil {
 		t.Errorf("expected %v, got nil", ErrJWTUnparsable)
