@@ -61,6 +61,11 @@ func TestRSAPublicJWK(t *testing.T) {
 		}
 		testRSAKeyPair(testCase.rsaPrivateKey, rsaPublicKey, testCase.plain, testCase.isErrCase, t)
 	}
+	// test public key creation for signing usage
+	_, err = RSAToPublicJWK(&publicKey, JWKID("valid"), PS256, &expirationTime)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
 }
 
 func TestRSAPrivateJWK(t *testing.T) {
@@ -113,6 +118,11 @@ func TestRSAPrivateJWK(t *testing.T) {
 			t.Errorf("%v", err)
 		}
 		testRSAKeyPair(rsaPrivateKey, &testCase.rsaPublicKey, testCase.plain, testCase.isErrCase, t)
+	}
+	// test private key creation for signing usage
+	_, err = RSAToPrivateJWK(privateKey, JWKID("valid"), PS256, &expirationTime)
+	if err != nil {
+		t.Errorf("%v", err)
 	}
 }
 
