@@ -143,6 +143,9 @@ func main() {
 func encrypt(plain, jwkBytes []byte) []byte {
 	var jwk jwc.RSAPublicJWK
 	err := json.Unmarshal(jwkBytes, &jwk)
+	if err != nil {
+		panic(err)
+	}
 	pubKey, err := jwc.JWKToPublicRSA(&jwk)
 	if err != nil {
 		panic(err)
