@@ -59,7 +59,7 @@ type JWTHeader struct {
 // JWTPayload - JWT payload
 type JWTPayload struct {
 	RegisteredClaims
-	PrivateClaims
+	PrivateClaims `json:"priv"`
 }
 
 // RegisteredClaims - common data embedded in JWT
