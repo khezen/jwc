@@ -33,13 +33,13 @@ import (
 )
 
 func main() {
-	var (
-		privateKey, _ = rsa.GenerateKey(rand.Reader, 1024)
-		uid           = uuid.New()
-		jwkid         = jwc.JWKID(uid.String())
-		jwk, _        = jwc.RSAToPublicJWK(&privateKey.PublicKey, jwkid, jwc.PS256, nil)
-		jwkBytes, _   = json.Marshal(jwk)
-	)
+    var (
+        privateKey, _ = rsa.GenerateKey(rand.Reader, 1024)
+        uid           = uuid.New()
+        jwkid         = jwc.JWKID(uid.String())
+        jwk, _        = jwc.RSAToPublicJWK(&privateKey.PublicKey, jwkid, jwc.PS256, nil)
+        jwkBytes, _   = json.Marshal(jwk)
+    )
     jwtStr := issueJWT(jwkid, privateKey)
     token := verify(jwtStr, jwkBytes)
     fmt.Println(jwtStr)
