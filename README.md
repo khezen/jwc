@@ -78,7 +78,7 @@ func ExampleNewJWT() {
 	fmt.Println(jwtStr)
 }
 
-// ExampleDecodeVerifyJWT -
+// ExampleDecodeVerifyJWT - verify and decode a JSON Web Token
 func ExampleDecodeVerifyJWT() {
 	var pubJWK jwc.RSAPublicJWK
 	err = json.Unmarshal(jwkBytes, &pubJWK)
