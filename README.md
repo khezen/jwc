@@ -40,12 +40,10 @@ func main() {
 		jwk, _        = jwc.RSAToPublicJWK(&privateKey.PublicKey, jwkid, jwc.PS256, nil)
 		jwkBytes, _   = json.Marshal(jwk)
 	)
-	jwtStr := issueJWT(jwkid, privateKey)
-	fmt.Println(jwtStr)
-	fmt.Println()
-
-	token := verify(jwtStr, jwkBytes)
-	fmt.Println("token signature is verified")
+    jwtStr := issueJWT(jwkid, privateKey)
+    token := verify(jwtStr, jwkBytes)
+    fmt.Println(jwtStr)
+    fmt.Println()
 	fmt.Println(token)
 }
 
@@ -107,7 +105,6 @@ func verify(jwtStr string, jwkBytes []byte) *jwc.JWT {
 ```sh
 eyJhbGciOiJQUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjRkYjY2NzgwLWYzNjMtNDdmZC05MDlkLTQ0MWM1ZmUyM2Q2MSJ9.eyJleHAiOjE1NDYzNjk0NTIsImlhdCI6MTU0NjM2OTM5MiwiaXNzIjoiZ2l0aHViLmNvbS9raGV6ZW4vandjL2p3dF90ZXN0LmdvIiwic3ViIjoidGVzdCIsInByaXYiOnsiYXVkIjoiYW5kcm9pZC5teWFwcC5jb20iLCJjYyI6ImR1bW15Q29kZUNoYWxsZW5nZSIsImNjbSI6IlMyNTYiLCJjaWQiOiIwMTA4YmZiZC0yZjc2LTQyMmEtYTNiZC0yNjMxZmVhYWNiZWUiLCJkaWQiOiJkZXZpY2VJRCIsInNjbyI6Im9mZmxpbmUiLCJ0aWQiOiJiMGIwZWM5Mi1jZTNjLTQ3ZjUtODQ5Ny03Y2FiMjkxNDcyZDAifX0.WktA5tt_Tt6R-qZuTqpSB7xnYDrMlJXjz7aTzQys1UjMAEjLFHCWqmLp33DRlUboZiZQWa_6D4c6fzS-UHFQ9pQ_73s_Rg83i6XEMJIlr2k420g_cO-N_y425gnoJ2GDOpVSGxMS5uofh8JoE6OZpPNauJo_Z5MNpEKp5XZDEAE
 
-token signature is verified
 &{{PS256 JWT 4db66780-f363-47fd-909d-441c5fe23d61} {{1546369452 1546369392 github.com/khezen/jwc/jwt_test.go test } map[tid:b0b0ec92-ce3c-47f5-8497-7cab291472d0 aud:android.myapp.com cc:dummyCodeChallenge ccm:S256 cid:0108bfbd-2f76-422a-a3bd-2631feaacbee did:deviceID sco:offline]}}
 ```
 
