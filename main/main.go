@@ -28,7 +28,7 @@ func ExampleNewJWT() {
 	nowUnix := now.Unix()
 	exp := now.Add(time.Minute)
 	expUnix := exp.Unix()
-	jwt := jwc.NewJWT(
+	jwt, err := jwc.NewJWT(
 		jwc.JWTPayload{
 			RegisteredClaims: jwc.RegisteredClaims{
 				IssuedAtTimestamp:   nowUnix,
@@ -48,7 +48,9 @@ func ExampleNewJWT() {
 		},
 		jwc.PS256,
 	)
-
+	if err != nil {
+		panic(err)
+	}
 	jwtStr, err = jwt.Encode(jwkid, privateKey)
 	if err != nil {
 		panic(err)
