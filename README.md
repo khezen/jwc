@@ -112,6 +112,8 @@ func main() {
 }
 ```
 
+#### output
+
 ```json
 issuing token...
 token:
