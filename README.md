@@ -33,22 +33,23 @@ import (
 )
 
 func main() {
-	sign()
+	var (
+		privateKey, _ = rsa.GenerateKey(rand.Reader, 1024)
+		uid           = uuid.New()
+		jwkid         = jwc.JWKID(uid.String())
+		jwk, _        = jwc.RSAToPublicJWK(&privateKey.PublicKey, jwkid, jwc.PS256, nil)
+		jwkBytes, _   = json.Marshal(jwk)
+	)
+	jwtStr := issueJWT(jwkid, privateKey)
+	fmt.Println(jwtStr)
 	fmt.Println()
-	verify()
+
+	token := verify(jwtStr, jwkBytes)
+	fmt.Println("token signature is verified")
+	fmt.Println(token)
 }
 
-var (
-	privateKey, _ = rsa.GenerateKey(rand.Reader, 1024)
-	uid           = uuid.New()
-	jwkid         = jwc.JWKID(uid.String())
-	jwk, _        = jwc.RSAToPrivateJWK(privateKey, jwkid, jwc.PS256, nil)
-	jwkBytes, _   = json.Marshal(jwk)
-	jwtStr        string
-	err           error
-)
-
-func sign() {
+func issueJWT(keyID jwc.JWKID, privateKey *rsa.PrivateKey) string {
 	now := time.Now().UTC()
 	nowUnix := now.Unix()
 	exp := now.Add(time.Minute)
@@ -76,16 +77,16 @@ func sign() {
 	if err != nil {
 		panic(err)
 	}
-	jwtStr, err = jwt.Encode(jwkid, privateKey)
+	jwtStr, err := jwt.Encode(keyID, privateKey)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(jwtStr)
+	return jwtStr
 }
 
-func verify() {
+func verify(jwtStr string, jwkBytes []byte) *jwc.JWT {
 	var pubJWK jwc.RSAPublicJWK
-	err = json.Unmarshal(jwkBytes, &pubJWK)
+	err := json.Unmarshal(jwkBytes, &pubJWK)
 	if err != nil {
 		panic(err)
 	}
@@ -97,8 +98,7 @@ func verify() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("token signature is verified")
-	fmt.Println(token)
+	return token
 }
 ```
 
