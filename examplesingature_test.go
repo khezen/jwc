@@ -11,6 +11,12 @@ import (
 	"github.com/khezen/jwc"
 )
 
+func ExampleJWT() {
+	sign()
+	fmt.Println()
+	verify()
+}
+
 var (
 	privateKey, _ = rsa.GenerateKey(rand.Reader, 1024)
 	uid           = uuid.New()
@@ -22,7 +28,7 @@ var (
 )
 
 // ExampleNewJWT - issue a JSON Web Token
-func ExampleNewJWT() {
+func sign() {
 	now := time.Now().UTC()
 	nowUnix := now.Unix()
 	exp := now.Add(time.Minute)
@@ -60,7 +66,7 @@ func ExampleNewJWT() {
 }
 
 // ExampleDecodeVerifyJWT - verify and decode a JSON Web Token
-func ExampleDecodeVerifyJWT() {
+func verify() {
 	var pubJWK jwc.RSAPublicJWK
 	err = json.Unmarshal(jwkBytes, &pubJWK)
 	if err != nil {
