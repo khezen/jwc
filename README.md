@@ -4,7 +4,9 @@
 [![Build Status](http://img.shields.io/travis/khezen/jwc.svg?style=flat-square)](https://travis-ci.org/khezen/jwc) [![codecov](https://img.shields.io/codecov/c/github/khezen/jwc/master.svg?style=flat-square)](https://codecov.io/gh/khezen/jwc)
 [![Go Report Card](https://goreportcard.com/badge/github.com/khezen/jwc?style=flat-square)](https://goreportcard.com/report/github.com/khezen/jwc)
 
-* jwc - JSON Web Signature
+JSON Web Cryptography
+
+* jws - JSON Web Signature
   * RSASSA-PSS + SHA256, recommended +
   * RSASSA-PKCS1-v1_5 + SHA256, recommended -
   
