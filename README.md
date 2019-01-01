@@ -48,7 +48,6 @@ var (
 	err           error
 )
 
-// ExampleNewJWT - issue a JSON Web Token
 func sign() {
 	now := time.Now().UTC()
 	nowUnix := now.Unix()
@@ -84,7 +83,6 @@ func sign() {
 	fmt.Println(jwtStr)
 }
 
-// ExampleDecodeVerifyJWT - verify and decode a JSON Web Token
 func verify() {
 	var pubJWK jwc.RSAPublicJWK
 	err = json.Unmarshal(jwkBytes, &pubJWK)
