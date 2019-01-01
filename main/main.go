@@ -21,9 +21,8 @@ var (
 	err           error
 )
 
-// ExampleNewJWT -
+// ExampleNewJWT - issue a JSON Web Token
 func ExampleNewJWT() {
-	fmt.Println("issuing token...")
 	now := time.Now().UTC()
 	nowUnix := now.Unix()
 	exp := now.Add(time.Minute)
@@ -55,15 +54,11 @@ func ExampleNewJWT() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("token:")
 	fmt.Println(jwtStr)
-	fmt.Println("signed with private key:")
-	fmt.Println(string(jwkBytes))
 }
 
 // ExampleDecodeVerifyJWT -
 func ExampleDecodeVerifyJWT() {
-	fmt.Println("verifying token...")
 	var pubJWK jwc.RSAPublicJWK
 	err = json.Unmarshal(jwkBytes, &pubJWK)
 	if err != nil {
@@ -77,15 +72,8 @@ func ExampleDecodeVerifyJWT() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("token signature is verified with public key:")
-	pubJWKBytes, _ := json.Marshal(pubJWK)
-	fmt.Println(string(pubJWKBytes))
-	fmt.Println("obtained a token with header:")
-	headerBytes, _ := json.Marshal(token.Header)
-	fmt.Println(string(headerBytes))
-	fmt.Println("and payload:")
-	payloadBytes, _ := json.Marshal(token.Payload)
-	fmt.Println(string(payloadBytes))
+	fmt.Println("token signature is verified")
+	fmt.Println(token)
 }
 
 func main() {
