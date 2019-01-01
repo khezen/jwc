@@ -133,27 +133,37 @@ func main() {
 		publicJWK, _      = jwc.RSAToPublicJWK(&privateKey.PublicKey, jwkid, jwc.ROAEP, nil)
 		publicJWKBytes, _ = json.Marshal(publicJWK)
 		plain             = []byte("lorem ipsum ipsa occaecati aut velit facilis enim dolorum id eius magni ducimus sed illum similique cupiditate sit id perferendis alias sint")
-		cipher            []byte
-		err               error
 	)
+	cipher := encrypt(plain, publicJWKBytes)
+	deciphered := decrypt(cipher, privateKey)
+	cmp := bytes.Compare(plain, deciphered)
+	fmt.Println(cmp == 0)
+}
+
+func encrypt(plain, jwkBytes []byte) []byte {
 	var jwk jwc.RSAPublicJWK
-	err = json.Unmarshal(publicJWKBytes, &jwk)
+	err := json.Unmarshal(jwkBytes, &jwk)
 	pubKey, err := jwc.JWKToPublicRSA(&jwk)
 	if err != nil {
 		panic(err)
 	}
 	hash := sha256.New()
 	label := []byte{}
-	cipher, err = rsa.EncryptOAEP(hash, rand.Reader, pubKey, plain, label)
+	cipher, err := rsa.EncryptOAEP(hash, rand.Reader, pubKey, plain, label)
 	if err != nil {
 		panic(err)
 	}
-	deciphered, err := rsa.DecryptOAEP(hash, rand.Reader, privateKey, cipher, label)
+	return cipher
+}
+
+func decrypt(cipher []byte, privateKey *rsa.PrivateKey) []byte {
+	hash := sha256.New()
+	label := []byte{}
+	plain, err := rsa.DecryptOAEP(hash, rand.Reader, privateKey, cipher, label)
 	if err != nil {
 		panic(err)
 	}
-	cmp := bytes.Compare(plain, deciphered)
-	fmt.Println(cmp == 0)
+	return plain
 }
 ```
 
