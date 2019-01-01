@@ -61,6 +61,11 @@ func TestRSAPublicJWK(t *testing.T) {
 		}
 		testRSAKeyPair(testCase.rsaPrivateKey, rsaPublicKey, testCase.plain, testCase.isErrCase, t)
 	}
+	// test public key creation for signing usage
+	_, err = RSAToPublicJWK(&publicKey, JWKID("valid"), PS256, &expirationTime)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
 }
 
 func TestRSAPrivateJWK(t *testing.T) {
@@ -113,6 +118,11 @@ func TestRSAPrivateJWK(t *testing.T) {
 			t.Errorf("%v", err)
 		}
 		testRSAKeyPair(rsaPrivateKey, &testCase.rsaPublicKey, testCase.plain, testCase.isErrCase, t)
+	}
+	// test private key creation for signing usage
+	_, err = RSAToPrivateJWK(privateKey, JWKID("valid"), PS256, &expirationTime)
+	if err != nil {
+		t.Errorf("%v", err)
 	}
 }
 
@@ -197,5 +207,111 @@ func testRSAKeyPair(rsaPrivateKey *rsa.PrivateKey, rsaPublicKey *rsa.PublicKey, 
 	}
 	if !isErrCase && string(plain) != string(deciphered) {
 		t.Errorf("expected %v got %v", string(plain), string(deciphered))
+	}
+}
+
+func TestJWKErrCases(t *testing.T) {
+	now := time.Now().UTC()
+	expirationTime := now.Add(time.Hour)
+	privateKey, err := rsa.GenerateKey(rand.Reader, 1024)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+	// mess up first prime factor
+	privateJWK, err := RSAToPrivateJWK(privateKey, JWKID("test"), RSA15, &expirationTime)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+	privateJWK.FirstPrimeFactorBase64 = "erf"
+	_, err = JWKToPrivateRSA(privateJWK)
+	if err == nil {
+		t.Error("expected err != nil")
+	}
+
+	// mess up second prime factor
+	privateJWK, err = RSAToPrivateJWK(privateKey, JWKID("test"), RSA15, &expirationTime)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+	privateJWK.SecondPrimeFactorBase64 = "dwfgew"
+	_, err = JWKToPrivateRSA(privateJWK)
+	if err == nil {
+		t.Error("expected err != nil")
+	}
+
+	// mess up second prime factor inverse modulo first prime factor
+	privateJWK, err = RSAToPrivateJWK(privateKey, JWKID("test"), RSA15, &expirationTime)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+	privateJWK.SecondPrimeInverseModFirstPrimeBase64 = "wqqea"
+	_, err = JWKToPrivateRSA(privateJWK)
+	if err == nil {
+		t.Error("expected err != nil")
+	}
+
+	// mess up private exponent
+	privateJWK, err = RSAToPrivateJWK(privateKey, JWKID("test"), RSA15, &expirationTime)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+	privateJWK.PrivateExponentBase64 = "dfrgthy"
+	_, err = JWKToPrivateRSA(privateJWK)
+	if err == nil {
+		t.Error("expected err != nil")
+	}
+
+	// mess up private exponent modulo first prime factor - 1
+	privateJWK, err = RSAToPrivateJWK(privateKey, JWKID("test"), RSA15, &expirationTime)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+	privateJWK.PrivateExpModFirstPrimeMinusOneBase64 = "dfrgthy"
+	_, err = JWKToPrivateRSA(privateJWK)
+	if err == nil {
+		t.Error("expected err != nil")
+	}
+
+	// mess up private exponent modulo second prime factor - 1
+	privateJWK, err = RSAToPrivateJWK(privateKey, JWKID("test"), RSA15, &expirationTime)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+	privateJWK.PrivateExpModSecondPrimeMinusOneBase64 = "okm"
+	_, err = JWKToPrivateRSA(privateJWK)
+	if err == nil {
+		t.Error("expected err != nil")
+	}
+
+	// mess up public exponent
+	privateJWK, err = RSAToPrivateJWK(privateKey, JWKID("test"), RSA15, &expirationTime)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+	privateJWK.PublicExponentBase64 = "tfghwefrg"
+	publicJWK := privateJWK.PublicKey()
+	_, err = JWKToPrivateRSA(privateJWK)
+	if err == nil {
+		t.Error("expected err != nil")
+	}
+	_, err = JWKToPublicRSA(publicJWK)
+	if err == nil {
+		t.Error("expected err != nil")
+	}
+
+	// mess up modulus
+	privateJWK, err = RSAToPrivateJWK(privateKey, JWKID("test"), RSA15, &expirationTime)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+	privateJWK.ModulusBase64 = "modulus"
+	publicJWK = privateJWK.PublicKey()
+	_, err = JWKToPrivateRSA(privateJWK)
+	if err == nil {
+		t.Error("expected err != nil")
+	}
+	_, err = JWKToPublicRSA(publicJWK)
+	if err == nil {
+		t.Error("expected err != nil")
 	}
 }
