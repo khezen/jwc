@@ -76,15 +76,15 @@ func RSAToPublicJWK(publicKey *rsa.PublicKey, jwkID JWKID, algo Algorithm, expir
 	return &publicJWK, nil
 }
 
-// JWKToPublicRSA - takes JWK and return it as rsa public key
-func JWKToPublicRSA(publicJWK *RSAPublicJWK) (*rsa.PublicKey, error) {
-	modulusBytes, err := base64.StdEncoding.DecodeString(publicJWK.ModulusBase64)
+// PublicRSA - takes JWK and return it as rsa public key
+func (jwk *RSAPublicJWK) PublicRSA() (*rsa.PublicKey, error) {
+	modulusBytes, err := base64.StdEncoding.DecodeString(jwk.ModulusBase64)
 	if err != nil {
 		return nil, err
 	}
 	modulus := new(big.Int)
 	modulus = modulus.SetBytes(modulusBytes)
-	publicExponentBytes, err := base64.StdEncoding.DecodeString(publicJWK.PublicExponentBase64)
+	publicExponentBytes, err := base64.StdEncoding.DecodeString(jwk.PublicExponentBase64)
 	if err != nil {
 		return nil, err
 	}
@@ -178,15 +178,15 @@ func RSAToPrivateJWK(privateKey *rsa.PrivateKey, jwkID JWKID, algo Algorithm, ex
 	return &privateJWK, nil
 }
 
-// JWKToPrivateRSA -  takes JWK and return it as rsa private key
-func JWKToPrivateRSA(privateJWK *RSAPrivateJWK) (*rsa.PrivateKey, error) {
-	modulusBytes, err := base64.StdEncoding.DecodeString(privateJWK.ModulusBase64)
+// PrivateRSA -  takes JWK and return it as rsa private key
+func (jwk *RSAPrivateJWK) PrivateRSA() (*rsa.PrivateKey, error) {
+	modulusBytes, err := base64.StdEncoding.DecodeString(jwk.ModulusBase64)
 	if err != nil {
 		return nil, err
 	}
 	modulus := new(big.Int)
 	modulus = modulus.SetBytes(modulusBytes)
-	publicExponentBytes, err := base64.StdEncoding.DecodeString(privateJWK.PublicExponentBase64)
+	publicExponentBytes, err := base64.StdEncoding.DecodeString(jwk.PublicExponentBase64)
 	if err != nil {
 		return nil, err
 	}
@@ -194,37 +194,37 @@ func JWKToPrivateRSA(privateJWK *RSAPrivateJWK) (*rsa.PrivateKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	privateExponentBytes, err := base64.StdEncoding.DecodeString(privateJWK.PrivateExponentBase64)
+	privateExponentBytes, err := base64.StdEncoding.DecodeString(jwk.PrivateExponentBase64)
 	if err != nil {
 		return nil, err
 	}
 	privateExponent := new(big.Int)
 	privateExponent = privateExponent.SetBytes(privateExponentBytes)
-	firstPrimeFactorBytes, err := base64.StdEncoding.DecodeString(privateJWK.FirstPrimeFactorBase64)
+	firstPrimeFactorBytes, err := base64.StdEncoding.DecodeString(jwk.FirstPrimeFactorBase64)
 	if err != nil {
 		return nil, err
 	}
 	firstPrimeFactor := new(big.Int)
 	firstPrimeFactor = firstPrimeFactor.SetBytes(firstPrimeFactorBytes)
-	secondPrimeFactorBytes, err := base64.StdEncoding.DecodeString(privateJWK.SecondPrimeFactorBase64)
+	secondPrimeFactorBytes, err := base64.StdEncoding.DecodeString(jwk.SecondPrimeFactorBase64)
 	if err != nil {
 		return nil, err
 	}
 	secondPrimeFactor := new(big.Int)
 	secondPrimeFactor = secondPrimeFactor.SetBytes(secondPrimeFactorBytes)
-	privateExpModFirstPrimeMinusOneBytes, err := base64.StdEncoding.DecodeString(privateJWK.PrivateExpModFirstPrimeMinusOneBase64)
+	privateExpModFirstPrimeMinusOneBytes, err := base64.StdEncoding.DecodeString(jwk.PrivateExpModFirstPrimeMinusOneBase64)
 	if err != nil {
 		return nil, err
 	}
 	privateExpModFirstPrimeMinusOne := new(big.Int)
 	privateExpModFirstPrimeMinusOne = privateExpModFirstPrimeMinusOne.SetBytes(privateExpModFirstPrimeMinusOneBytes)
-	privateExpModSecondPrimeMinusOneBytes, err := base64.StdEncoding.DecodeString(privateJWK.PrivateExpModSecondPrimeMinusOneBase64)
+	privateExpModSecondPrimeMinusOneBytes, err := base64.StdEncoding.DecodeString(jwk.PrivateExpModSecondPrimeMinusOneBase64)
 	if err != nil {
 		return nil, err
 	}
 	privateExpModSecondPrimeMinusOne := new(big.Int)
 	privateExpModSecondPrimeMinusOne = privateExpModSecondPrimeMinusOne.SetBytes(privateExpModSecondPrimeMinusOneBytes)
-	secondPrimeInverseModFirstPrimeBytes, err := base64.StdEncoding.DecodeString(privateJWK.SecondPrimeInverseModFirstPrimeBase64)
+	secondPrimeInverseModFirstPrimeBytes, err := base64.StdEncoding.DecodeString(jwk.SecondPrimeInverseModFirstPrimeBase64)
 	if err != nil {
 		return nil, err
 	}
