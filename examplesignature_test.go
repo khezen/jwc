@@ -70,7 +70,7 @@ func verify(jwtStr string, jwkBytes []byte) *jwc.JWT {
 	if err != nil {
 		panic(err)
 	}
-	pubKey, err := jwc.JWKToPublicRSA(&pubJWK)
+	pubKey, err := pubJWK.PublicRSA()
 	if err != nil {
 		panic(err)
 	}

@@ -33,7 +33,7 @@ func encrypt(plain, jwkBytes []byte) []byte {
 	if err != nil {
 		panic(err)
 	}
-	pubKey, err := jwc.JWKToPublicRSA(&jwk)
+	pubKey, err := jwk.PublicRSA()
 	if err != nil {
 		panic(err)
 	}

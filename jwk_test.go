@@ -55,7 +55,7 @@ func TestRSAPublicJWK(t *testing.T) {
 		if err != nil {
 			t.Errorf("%v", err)
 		}
-		rsaPublicKey, err := JWKToPublicRSA(&publicJWK)
+		rsaPublicKey, err := publicJWK.PublicRSA()
 		if err != nil {
 			t.Errorf("%v", err)
 		}
@@ -113,7 +113,7 @@ func TestRSAPrivateJWK(t *testing.T) {
 		if err != nil {
 			t.Errorf("%v", err)
 		}
-		rsaPrivateKey, err := JWKToPrivateRSA(&privateJWK)
+		rsaPrivateKey, err := privateJWK.PrivateRSA()
 		if err != nil {
 			t.Errorf("%v", err)
 		}
@@ -171,7 +171,7 @@ func TestRSAPrivateJWKPublickKey(t *testing.T) {
 		if err != nil {
 			t.Errorf("%v", err)
 		}
-		rsaPublicKey, err := JWKToPublicRSA(&publicJWK)
+		rsaPublicKey, err := publicJWK.PublicRSA()
 		if err != nil {
 			t.Errorf("%v", err)
 		}
@@ -223,7 +223,7 @@ func TestFirstPrimeFactorErr(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 	privateJWK.FirstPrimeFactorBase64 = "erf"
-	_, err = JWKToPrivateRSA(privateJWK)
+	_, err = privateJWK.PrivateRSA()
 	if err == nil {
 		t.Error("expected err != nil")
 	}
@@ -242,7 +242,7 @@ func TestSecondPrimeFactorErr(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 	privateJWK.SecondPrimeFactorBase64 = "dwfgew"
-	_, err = JWKToPrivateRSA(privateJWK)
+	_, err = privateJWK.PrivateRSA()
 	if err == nil {
 		t.Error("expected err != nil")
 	}
@@ -261,7 +261,7 @@ func TestSecondPrimeInverseModFirstPrimeErr(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 	privateJWK.SecondPrimeInverseModFirstPrimeBase64 = "wqqea"
-	_, err = JWKToPrivateRSA(privateJWK)
+	_, err = privateJWK.PrivateRSA()
 	if err == nil {
 		t.Error("expected err != nil")
 	}
@@ -279,7 +279,7 @@ func TestPrivateExponentErr(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 	privateJWK.PrivateExponentBase64 = "dfrgthy"
-	_, err = JWKToPrivateRSA(privateJWK)
+	_, err = privateJWK.PrivateRSA()
 	if err == nil {
 		t.Error("expected err != nil")
 	}
@@ -298,7 +298,7 @@ func TestPrivateExpModFirstPrimeErr(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 	privateJWK.PrivateExpModFirstPrimeMinusOneBase64 = "dfrgthy"
-	_, err = JWKToPrivateRSA(privateJWK)
+	_, err = privateJWK.PrivateRSA()
 	if err == nil {
 		t.Error("expected err != nil")
 	}
@@ -317,7 +317,7 @@ func TestPrivateExpModSecondPrimeErr(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 	privateJWK.PrivateExpModSecondPrimeMinusOneBase64 = "okm"
-	_, err = JWKToPrivateRSA(privateJWK)
+	_, err = privateJWK.PrivateRSA()
 	if err == nil {
 		t.Error("expected err != nil")
 	}
@@ -337,11 +337,11 @@ func TestPublicExponentErr(t *testing.T) {
 	}
 	privateJWK.PublicExponentBase64 = "tfghwefrg"
 	publicJWK := privateJWK.PublicKey()
-	_, err = JWKToPrivateRSA(privateJWK)
+	_, err = privateJWK.PrivateRSA()
 	if err == nil {
 		t.Error("expected err != nil")
 	}
-	_, err = JWKToPublicRSA(publicJWK)
+	_, err = publicJWK.PublicRSA()
 	if err == nil {
 		t.Error("expected err != nil")
 	}
@@ -360,11 +360,11 @@ func TestModulusErr(t *testing.T) {
 	}
 	privateJWK.ModulusBase64 = "modulus"
 	publicJWK := privateJWK.PublicKey()
-	_, err = JWKToPrivateRSA(privateJWK)
+	_, err = privateJWK.PrivateRSA()
 	if err == nil {
 		t.Error("expected err != nil")
 	}
-	_, err = JWKToPublicRSA(publicJWK)
+	_, err = publicJWK.PublicRSA()
 	if err == nil {
 		t.Error("expected err != nil")
 	}
