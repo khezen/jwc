@@ -222,7 +222,7 @@ func TestFirstPrimeFactorErr(t *testing.T) {
 	if err != nil {
 		t.Errorf("%v", err)
 	}
-	privateJWK.FirstPrimeFactorBase64 = "erf"
+	privateJWK.FirstPrimeFactorBase64 = "tfghwefrg"
 	_, err = privateJWK.PrivateRSA()
 	if err == nil {
 		t.Error("expected err != nil")
@@ -241,7 +241,7 @@ func TestSecondPrimeFactorErr(t *testing.T) {
 	if err != nil {
 		t.Errorf("%v", err)
 	}
-	privateJWK.SecondPrimeFactorBase64 = "dwfgew"
+	privateJWK.SecondPrimeFactorBase64 = "tfghwefrg"
 	_, err = privateJWK.PrivateRSA()
 	if err == nil {
 		t.Error("expected err != nil")
@@ -266,6 +266,7 @@ func TestSecondPrimeInverseModFirstPrimeErr(t *testing.T) {
 		t.Error("expected err != nil")
 	}
 }
+
 func TestPrivateExponentErr(t *testing.T) {
 	now := time.Now().UTC()
 	expirationTime := now.Add(time.Hour)
@@ -278,7 +279,7 @@ func TestPrivateExponentErr(t *testing.T) {
 	if err != nil {
 		t.Errorf("%v", err)
 	}
-	privateJWK.PrivateExponentBase64 = "dfrgthy"
+	privateJWK.PrivateExponentBase64 = "tfghwefrg"
 	_, err = privateJWK.PrivateRSA()
 	if err == nil {
 		t.Error("expected err != nil")
@@ -297,7 +298,7 @@ func TestPrivateExpModFirstPrimeErr(t *testing.T) {
 	if err != nil {
 		t.Errorf("%v", err)
 	}
-	privateJWK.PrivateExpModFirstPrimeMinusOneBase64 = "dfrgthy"
+	privateJWK.PrivateExpModFirstPrimeMinusOneBase64 = "tfghwefrg"
 	_, err = privateJWK.PrivateRSA()
 	if err == nil {
 		t.Error("expected err != nil")
@@ -316,7 +317,7 @@ func TestPrivateExpModSecondPrimeErr(t *testing.T) {
 	if err != nil {
 		t.Errorf("%v", err)
 	}
-	privateJWK.PrivateExpModSecondPrimeMinusOneBase64 = "okm"
+	privateJWK.PrivateExpModSecondPrimeMinusOneBase64 = "tfghwefrg"
 	_, err = privateJWK.PrivateRSA()
 	if err == nil {
 		t.Error("expected err != nil")
@@ -358,7 +359,7 @@ func TestModulusErr(t *testing.T) {
 	if err != nil {
 		t.Errorf("%v", err)
 	}
-	privateJWK.ModulusBase64 = "modulus"
+	privateJWK.ModulusBase64 = "tfghwefrg"
 	publicJWK := privateJWK.PublicKey()
 	_, err = privateJWK.PrivateRSA()
 	if err == nil {
