@@ -51,9 +51,10 @@ type JWT struct {
 
 // JWTHeader JWT header
 type JWTHeader struct {
-	Algorithm Algorithm `json:"alg"`
-	Type      string    `json:"typ"`
-	SignKeyID JWKID     `json:"kid"`
+	Algorithm   Algorithm `json:"alg"`
+	Type        string    `json:"typ"`
+	ContentType string    `json:"cty,omitempty"`
+	SignKeyID   JWKID     `json:"kid"`
 }
 
 // JWTPayload - JWT payload
