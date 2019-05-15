@@ -26,7 +26,12 @@ const (
 	RSA15 Algorithm = "RSA1_5"
 )
 
+// SymetricEncryptAlgorithm -
+type SymetricEncryptAlgorithm string
+
 var (
 	// ErrUnsupportedAlgorithm -
 	ErrUnsupportedAlgorithm = errors.New("ErrUnsupportedAlgorithm")
+	// ErrUnsupportedEncryption -
+	ErrUnsupportedEncryption = errors.New("ErrUnsupportedEncryption")
 )
