@@ -1,65 +1,27 @@
 package jwc
 
 import (
-	"crypto/rand"
 	"crypto/rsa"
-	"crypto/sha256"
-	"encoding/base64"
 )
 
 // https://tools.ietf.org/html/rfc7516
 
 // JWE - json web encrypted content
 type JWE struct {
-	JWEHeader
+	JOSEHeaders
 	EncryptedKey         []byte
 	InitializationVector []byte
 	CipherText           []byte
 	AuthenticationTag    []byte
 }
 
-// JWEHeader JWE header
-type JWEHeader struct {
-	Algorithm   Algorithm `json:"alg"`
-	Encryption  string    `json:"enc"`
-	Type        string    `json:"typ,omitempty"`
-	ContentType string    `json:"cty,omitempty"`
-	EncKeyID    JWKID     `json:"kid,omitempty"`
-}
-
-// NewJWE -
-func NewJWE(header *JWEHeader, pubKey *rsa.PublicKey) ([]byte, error) {
-	cek := make([]byte, 64)
-	_, err := rand.Read(cek)
-	if err != nil {
-		return nil, err
-	}
-	var (
-		encryptedKey []byte
-		rng          = rand.Reader
-	)
-	switch header.Algorithm {
-	case ROAEP:
-		encryptedKey, err = rsa.EncryptOAEP(sha256.New(), rng, pubKey, cek, nil)
-		break
-	case RSA15:
-		encryptedKey, err = rsa.EncryptPKCS1v15(rng, pubKey, cek)
-		break
-	default:
-		return nil, ErrUnsupportedAlgorithm
-	}
-	encryptedKeyBase64 := base64.URLEncoding.EncodeToString(encryptedKey)
-	initVector := make([]byte, 12)
-	_, err = rand.Read(initVector)
-	if err != nil {
-		return nil, err
-	}
-	initVectorBase64 = base64.URLEncoding.EncodeToString(initVector)
-	switch header.Encryption {
-	default:
-		return nil, ErrUnsupportedEncryption
-	}
-	return nil, nil
+// JOSEHeaders JWE header
+type JOSEHeaders struct {
+	Algorithm   Algorithm               `json:"alg"`
+	Encryption  ContentEncryptAlgorithm `json:"enc"`
+	Type        string                  `json:"typ,omitempty"`
+	ContentType string                  `json:"cty,omitempty"`
+	EncKeyID    JWKID                   `json:"kid,omitempty"`
 }
 
 // ParseJWE -

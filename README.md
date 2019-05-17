@@ -11,8 +11,17 @@ JSON Web Cryptography
   * RSASSA-PKCS1-v1_5 + SHA256, recommended -
   
 * jwe - JSON Web Encryption
-  * RSA-OAEP, recommended +
-  * RSAES-PKCS1-v1_5, recommended -
+  * key encryption
+    * RSA-OAEP, recommended +
+    * RSAES-PKCS1-v1_5, recommended -
+  * content encryption
+    * A128CBC-HS256
+    * A192CBC-HS384
+    * A256CBC-HS512
+    * A128GCM
+    * A192GCM
+    * A256GCM
+
 
 ## Example
 
