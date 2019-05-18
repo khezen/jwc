@@ -8,34 +8,33 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"hash"
 )
 
-func newJWEA128CBCHS256(headers *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) ([]byte, error) {
-	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(16, headers.Algorithm, pubKey)
+func newJWEA128CBCHS256(protectedHeaders *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) (*JWE, error) {
+	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(16, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
 		return nil, err
 	}
 	hashAlg := sha256.New()
-	return newCBC(cek, cipherCEK, cipherCEKB64, hashAlg, headers, pubKey, plaintext)
+	return newCBC(cek, cipherCEK, cipherCEKB64, hashAlg, protectedHeaders, pubKey, plaintext)
 }
 
-func newJWEA192CBCHS384(headers *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) ([]byte, error) {
-	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(24, headers.Algorithm, pubKey)
+func newJWEA192CBCHS384(protectedHeaders *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) (*JWE, error) {
+	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(24, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
 		return nil, err
 	}
 	hashAlg := sha512.New384()
-	return newCBC(cek, cipherCEK, cipherCEKB64, hashAlg, headers, pubKey, plaintext)
+	return newCBC(cek, cipherCEK, cipherCEKB64, hashAlg, protectedHeaders, pubKey, plaintext)
 }
-func newJWEA256CBCHS512(headers *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) ([]byte, error) {
-	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(32, headers.Algorithm, pubKey)
+func newJWEA256CBCHS512(protectedHeaders *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) (*JWE, error) {
+	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(32, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
 		return nil, err
 	}
 	hashAlg := sha512.New()
-	return newCBC(cek, cipherCEK, cipherCEKB64, hashAlg, headers, pubKey, plaintext)
+	return newCBC(cek, cipherCEK, cipherCEKB64, hashAlg, protectedHeaders, pubKey, plaintext)
 }
 
 func newCBC(
@@ -43,15 +42,15 @@ func newCBC(
 	cipherCEK []byte,
 	cipherCEKB64 string,
 	hash hash.Hash,
-	headerss *JOSEHeaders,
+	protectedHeaders *JOSEHeaders,
 	pubKey *rsa.PublicKey,
 	plaintext []byte,
-) ([]byte, error) {
-	headerssBytes, err := json.Marshal(headerss)
+) (*JWE, error) {
+	headersBytes, err := json.Marshal(protectedHeaders)
 	if err != nil {
 		return nil, err
 	}
-	headerssB64 := base64.URLEncoding.EncodeToString(headerssBytes)
+	headersB64 := base64.RawURLEncoding.EncodeToString(headersBytes)
 	iv, ivB64, err := GenerateInitVector(aes.BlockSize)
 	if err != nil {
 		return nil, err
@@ -64,9 +63,15 @@ func newCBC(
 	}
 	mode := cipher.NewCBCEncrypter(block, iv)
 	mode.CryptBlocks(ciphertext[aes.BlockSize:], plaintext)
-	ciphetextB64 := base64.URLEncoding.EncodeToString(ciphertext)
-	authTag := String2ASCII(headerssB64)
-	authTagB64 := base64.URLEncoding.EncodeToString([]byte(authTag))
-	jwe := fmt.Sprintf("%s.%s.%s.%s.%s", headerssB64, cipherCEKB64, ivB64, ciphetextB64, authTagB64)
-	return []byte(jwe), nil
+	ciphertextB64 := base64.RawURLEncoding.EncodeToString(ciphertext)
+	authTag := String2ASCII(headersB64)
+	authTagB64 := base64.RawURLEncoding.EncodeToString([]byte(authTag))
+	jwe := JWE{
+		ProtectedB64:  headersB64,
+		CipherCEKB64:  cipherCEKB64,
+		InitVectorB64: ivB64,
+		CiphertextB64: ciphertextB64,
+		TagB64:        authTagB64,
+	}
+	return &jwe, nil
 }

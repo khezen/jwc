@@ -6,23 +6,39 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/base64"
+	"strings"
 )
 
+// ParseCompactJWE -
+func ParseCompactJWE(compact []byte, privKey *rsa.PrivateKey) (jwe *JWE, err error) {
+	jweFragments := strings.Split(string(compact), ".")
+	if len(jweFragments) != 5 {
+		return nil, ErrCompactJWEUnparsable
+	}
+	return &JWE{
+		ProtectedB64:  jweFragments[0],
+		CipherCEKB64:  jweFragments[1],
+		InitVectorB64: jweFragments[2],
+		CiphertextB64: jweFragments[3],
+		TagB64:        jweFragments[4],
+	}, nil
+}
+
 // NewJWE -
-func NewJWE(headers *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) ([]byte, error) {
-	switch headers.Encryption {
+func NewJWE(protectedHeaders *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) (*JWE, error) {
+	switch protectedHeaders.Encryption {
 	case A128CBCHS256:
-		return newJWEA128CBCHS256(headers, pubKey, plaintext)
+		return newJWEA128CBCHS256(protectedHeaders, pubKey, plaintext)
 	case A192CBCHS384:
-		return newJWEA192CBCHS384(headers, pubKey, plaintext)
+		return newJWEA192CBCHS384(protectedHeaders, pubKey, plaintext)
 	case A256CBCHS512:
-		return newJWEA256CBCHS512(headers, pubKey, plaintext)
+		return newJWEA256CBCHS512(protectedHeaders, pubKey, plaintext)
 	case A128GCM:
-		return newJWEA128GCM(headers, pubKey, plaintext)
+		return newJWEA128GCM(protectedHeaders, pubKey, plaintext)
 	case A256GCM:
-		return newJWEA256GCM(headers, pubKey, plaintext)
+		return newJWEA256GCM(protectedHeaders, pubKey, plaintext)
 	case A512GCM:
-		return newJWEA512GCM(headers, pubKey, plaintext)
+		return newJWEA512GCM(protectedHeaders, pubKey, plaintext)
 	default:
 		return nil, ErrUnsupportedEncryption
 	}
@@ -46,7 +62,7 @@ func GenerateCEK(byteLength int, alg Algorithm, pubKey *rsa.PublicKey) (cek []by
 	default:
 		return nil, nil, "", ErrUnsupportedAlgorithm
 	}
-	cipherCEKB64 = base64.URLEncoding.EncodeToString(cipherCEK)
+	cipherCEKB64 = base64.RawURLEncoding.EncodeToString(cipherCEK)
 	return cek, cipherCEK, cipherCEKB64, nil
 }
 
@@ -57,7 +73,7 @@ func GenerateInitVector(byteLength int) (iv []byte, ivB64 string, err error) {
 	if err != nil {
 		return nil, "", err
 	}
-	ivB64 = base64.URLEncoding.EncodeToString(iv)
+	ivB64 = base64.RawURLEncoding.EncodeToString(iv)
 	return iv, ivB64, nil
 }
 

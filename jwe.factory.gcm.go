@@ -6,46 +6,45 @@ import (
 	"crypto/rsa"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 )
 
-func newJWEA128GCM(headers *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) ([]byte, error) {
-	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(16, headers.Algorithm, pubKey)
+func newJWEA128GCM(protectedHeaders *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) (*JWE, error) {
+	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(16, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
 		return nil, err
 	}
-	return newGCM(cek, cipherCEK, cipherCEKB64, headers, pubKey, plaintext)
+	return newGCM(cek, cipherCEK, cipherCEKB64, protectedHeaders, pubKey, plaintext)
 }
 
-func newJWEA256GCM(headers *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) ([]byte, error) {
-	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(32, headers.Algorithm, pubKey)
+func newJWEA256GCM(protectedHeaders *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) (*JWE, error) {
+	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(32, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
 		return nil, err
 	}
-	return newGCM(cek, cipherCEK, cipherCEKB64, headers, pubKey, plaintext)
+	return newGCM(cek, cipherCEK, cipherCEKB64, protectedHeaders, pubKey, plaintext)
 }
 
-func newJWEA512GCM(headers *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) ([]byte, error) {
-	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(64, headers.Algorithm, pubKey)
+func newJWEA512GCM(protectedHeaders *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) (*JWE, error) {
+	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(64, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
 		return nil, err
 	}
-	return newGCM(cek, cipherCEK, cipherCEKB64, headers, pubKey, plaintext)
+	return newGCM(cek, cipherCEK, cipherCEKB64, protectedHeaders, pubKey, plaintext)
 }
 
 func newGCM(
 	cek []byte,
 	cipherCEK []byte,
 	cipherCEKB64 string,
-	headerss *JOSEHeaders,
+	protectedHeaders *JOSEHeaders,
 	pubKey *rsa.PublicKey,
 	plaintext []byte,
-) ([]byte, error) {
-	headerssBytes, err := json.Marshal(headerss)
+) (*JWE, error) {
+	headersBytes, err := json.Marshal(protectedHeaders)
 	if err != nil {
 		return nil, err
 	}
-	headerssB64 := base64.URLEncoding.EncodeToString(headerssBytes)
+	headersB64 := base64.RawURLEncoding.EncodeToString(headersBytes)
 	iv, ivB64, err := GenerateInitVector(aes.BlockSize)
 	if err != nil {
 		return nil, err
@@ -58,10 +57,16 @@ func newGCM(
 	if err != nil {
 		return nil, err
 	}
-	authTag := []byte(String2ASCII(headerssB64))
-	authTagB64 := base64.URLEncoding.EncodeToString(authTag)
-	ciphertext := mode.Seal(nil, iv, plaintext, authTag)
-	ciphetextB64 := base64.URLEncoding.EncodeToString(ciphertext)
-	jwe := fmt.Sprintf("%s.%s.%s.%s.%s", headerssB64, cipherCEKB64, ivB64, ciphetextB64, authTagB64)
-	return []byte(jwe), nil
+	authTag := []byte(String2ASCII(headersB64))
+	authTagB64 := base64.RawURLEncoding.EncodeToString(authTag)
+	ciphertext := mode.Seal(nil, iv, plaintext, nil)
+	ciphertextB64 := base64.RawURLEncoding.EncodeToString(ciphertext)
+	jwe := JWE{
+		ProtectedB64:  headersB64,
+		CipherCEKB64:  cipherCEKB64,
+		InitVectorB64: ivB64,
+		CiphertextB64: ciphertextB64,
+		TagB64:        authTagB64,
+	}
+	return &jwe, nil
 }
