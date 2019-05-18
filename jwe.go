@@ -40,21 +40,28 @@ type JWE struct {
 	CipherCEKB64                string `json:"encrypted_key"`
 	InitVectorB64               string `json:"iv"`
 	CiphertextB64               string `json:"ciphertext"`
-	TagB64                      string `json:"tag"`
+	TagB64                      string `json:"tag,omitempty"`
 }
 
 // Compact formats to the JWE compact serialisation
 func (jwe *JWE) Compact() []byte {
-	return []byte(
-		fmt.Sprintf(
+	if len(jwe.TagB64) > 0 {
+		return []byte(fmt.Sprintf(
 			"%s.%s.%s.%s.%s",
 			jwe.ProtectedB64,
 			jwe.CipherCEKB64,
 			jwe.InitVectorB64,
 			jwe.CiphertextB64,
 			jwe.TagB64,
-		),
-	)
+		))
+	}
+	return []byte(fmt.Sprintf(
+		"%s.%s.%s.%s",
+		jwe.ProtectedB64,
+		jwe.CipherCEKB64,
+		jwe.InitVectorB64,
+		jwe.CiphertextB64,
+	))
 }
 
 // Plaintext returns deciphered content
