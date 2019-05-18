@@ -43,11 +43,15 @@ func ParseJWE(jwe []byte, privKey *rsa.PrivateKey) (plaintext []byte, err error)
 		mode := cipher.NewCBCDecrypter(block, iv)
 		mode.CryptBlocks(plaintext, ciphertext[aes.BlockSize:])
 	case A128GCM, A256GCM, A512GCM:
+		tag, err := base64.URLEncoding.DecodeString(jweFragments[4])
+		if err != nil {
+			return nil, err
+		}
 		mode, err := cipher.NewGCM(block)
 		if err != nil {
 			return nil, err
 		}
-		plaintext, err = mode.Open(nil, iv, ciphertext, nil)
+		plaintext, err = mode.Open(nil, iv, ciphertext, tag)
 		if err != nil {
 			return nil, err
 		}

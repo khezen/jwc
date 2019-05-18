@@ -63,8 +63,11 @@ func GenerateInitVector(byteLength int) (iv []byte, ivB64 string, err error) {
 
 // String2ASCII - ensure ASCII encoding
 func String2ASCII(s string) string {
-	buf := new(bytes.Buffer)
-	for _, r := range s {
+	var (
+		buf = new(bytes.Buffer)
+		r   rune
+	)
+	for _, r = range s {
 		buf.WriteRune(Rune2ASCII(r))
 	}
 	return buf.String()

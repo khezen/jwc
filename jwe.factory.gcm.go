@@ -58,10 +58,10 @@ func newGCM(
 	if err != nil {
 		return nil, err
 	}
-	ciphertext := mode.Seal(nil, iv, plaintext, nil)
+	authTag := []byte(String2ASCII(headerssB64))
+	authTagB64 := base64.URLEncoding.EncodeToString(authTag)
+	ciphertext := mode.Seal(nil, iv, plaintext, authTag)
 	ciphetextB64 := base64.URLEncoding.EncodeToString(ciphertext)
-	authTag := String2ASCII(headerssB64)
-	authTagB64 := base64.URLEncoding.EncodeToString([]byte(authTag))
 	jwe := fmt.Sprintf("%s.%s.%s.%s.%s", headerssB64, cipherCEKB64, ivB64, ciphetextB64, authTagB64)
 	return []byte(jwe), nil
 }
