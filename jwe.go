@@ -34,13 +34,13 @@ type JOSEHeaders struct {
 
 // JWE -
 type JWE struct {
-	ProtectedB64                   string `json:"protected"`
-	UnprotectedB64                 string `json:"unprotected,omitmepty"`
-	AdditionalAuthenticatedDataB64 string `json:"add,omitempty"`
-	CipherCEKB64                   string `json:"encrypted_key"`
-	InitVectorB64                  string `json:"iv"`
-	CiphertextB64                  string `json:"ciphertext"`
-	TagB64                         string `json:"tag"`
+	ProtectedB64                string `json:"protected"`
+	UnprotectedB64              string `json:"unprotected,omitmepty"`
+	AdditionalAuthenticatedData string `json:"add,omitempty"`
+	CipherCEKB64                string `json:"encrypted_key"`
+	InitVectorB64               string `json:"iv"`
+	CiphertextB64               string `json:"ciphertext"`
+	TagB64                      string `json:"tag"`
 }
 
 // Compact formats to the JWE compact serialisation
@@ -90,7 +90,11 @@ func (jwe *JWE) Plaintext(privKey *rsa.PrivateKey) (plaintext []byte, err error)
 		if err != nil {
 			return nil, err
 		}
-		plaintext, err = mode.Open(nil, iv, ciphertext, nil)
+		authTag, err := base64.RawURLEncoding.DecodeString(jwe.TagB64)
+		if err != nil {
+			return nil, err
+		}
+		plaintext, err = mode.Open(nil, iv, ciphertext, authTag)
 		if err != nil {
 			return nil, err
 		}

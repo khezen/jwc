@@ -64,14 +64,11 @@ func newCBC(
 	mode := cipher.NewCBCEncrypter(block, iv)
 	mode.CryptBlocks(ciphertext[aes.BlockSize:], plaintext)
 	ciphertextB64 := base64.RawURLEncoding.EncodeToString(ciphertext)
-	authTag := String2ASCII(headersB64)
-	authTagB64 := base64.RawURLEncoding.EncodeToString([]byte(authTag))
 	jwe := JWE{
 		ProtectedB64:  headersB64,
 		CipherCEKB64:  cipherCEKB64,
 		InitVectorB64: ivB64,
 		CiphertextB64: ciphertextB64,
-		TagB64:        authTagB64,
 	}
 	return &jwe, nil
 }

@@ -11,8 +11,16 @@ import (
 
 // ParseCompactJWE -
 func ParseCompactJWE(compact []byte, privKey *rsa.PrivateKey) (jwe *JWE, err error) {
-	jweFragments := strings.Split(string(compact), ".")
-	if len(jweFragments) != 5 {
+	var (
+		jweFragments = strings.Split(string(compact), ".")
+		tagB64       string
+	)
+	switch len(jweFragments) {
+	case 4:
+		break
+	case 5:
+		tagB64 = jweFragments[4]
+	default:
 		return nil, ErrCompactJWEUnparsable
 	}
 	return &JWE{
@@ -20,7 +28,7 @@ func ParseCompactJWE(compact []byte, privKey *rsa.PrivateKey) (jwe *JWE, err err
 		CipherCEKB64:  jweFragments[1],
 		InitVectorB64: jweFragments[2],
 		CiphertextB64: jweFragments[3],
-		TagB64:        jweFragments[4],
+		TagB64:        tagB64,
 	}, nil
 }
 

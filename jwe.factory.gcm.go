@@ -45,10 +45,6 @@ func newGCM(
 		return nil, err
 	}
 	headersB64 := base64.RawURLEncoding.EncodeToString(headersBytes)
-	iv, ivB64, err := GenerateInitVector(aes.BlockSize)
-	if err != nil {
-		return nil, err
-	}
 	block, err := aes.NewCipher(cek)
 	if err != nil {
 		return nil, err
@@ -57,16 +53,24 @@ func newGCM(
 	if err != nil {
 		return nil, err
 	}
-	authTag := []byte(String2ASCII(headersB64))
+	iv, ivB64, err := GenerateInitVector(mode.NonceSize())
+	if err != nil {
+		return nil, err
+	}
+	additionalAuthenticatedData := []byte(String2ASCII(headersB64))
+	ciphertext := mode.Seal(nil, iv, plaintext, additionalAuthenticatedData)
+	pivot := len(ciphertext) - aes.BlockSize
+	authTag := ciphertext[pivot:]
 	authTagB64 := base64.RawURLEncoding.EncodeToString(authTag)
-	ciphertext := mode.Seal(nil, iv, plaintext, nil)
+	ciphertext = ciphertext[:pivot]
 	ciphertextB64 := base64.RawURLEncoding.EncodeToString(ciphertext)
 	jwe := JWE{
-		ProtectedB64:  headersB64,
-		CipherCEKB64:  cipherCEKB64,
-		InitVectorB64: ivB64,
-		CiphertextB64: ciphertextB64,
-		TagB64:        authTagB64,
+		ProtectedB64:                headersB64,
+		AdditionalAuthenticatedData: string(additionalAuthenticatedData),
+		CipherCEKB64:                cipherCEKB64,
+		InitVectorB64:               ivB64,
+		CiphertextB64:               ciphertextB64,
+		TagB64:                      authTagB64,
 	}
 	return &jwe, nil
 }
