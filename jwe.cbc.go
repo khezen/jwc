@@ -30,7 +30,7 @@ func plaintextCBC(K, iv, ciphertext, authTag, additionalAuthenticatedData []byte
 	mode := cipher.NewCBCDecrypter(block, iv)
 	plaintext = make([]byte, len(ciphertext))
 	mode.CryptBlocks(plaintext, ciphertext)
-	plaintext, err = Unpad(plaintext)
+	plaintext, err = UnpadPKCS7(plaintext)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func newCBC(
 		return nil, err
 	}
 	mode := cipher.NewCBCEncrypter(block, iv)
-	plaintext = Pad(plaintext, aes.BlockSize)
+	plaintext = PadPKCS7(plaintext, aes.BlockSize)
 	ciphertext := make([]byte, len(plaintext))
 	mode.CryptBlocks(ciphertext, plaintext)
 	ciphertextB64 := base64.RawURLEncoding.EncodeToString(ciphertext)
@@ -114,19 +114,19 @@ func renderCBCAuthTag(additionalAuthenticatedData, iv, ciphertext, hmacKey []byt
 	return authTag
 }
 
-// Pad -
-func Pad(src []byte, blockSize int) []byte {
+// PadPKCS7 -
+func PadPKCS7(src []byte, blockSize int) []byte {
 	padding := blockSize - len(src)%blockSize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
 	return append(src, padtext...)
 }
 
-// Unpad -
-func Unpad(src []byte) ([]byte, error) {
+// UnpadPKCS7 -
+func UnpadPKCS7(src []byte) ([]byte, error) {
 	length := len(src)
 	unpadding := int(src[length-1])
 	if unpadding > length {
-		return nil, errors.New("unpad error. This could happen when incorrect encryption key is used")
+		return nil, errors.New("PKCS#7: error while unpadding")
 	}
 	return src[:(length - unpadding)], nil
 }
