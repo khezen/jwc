@@ -106,39 +106,33 @@ func TestJWE(t *testing.T) {
 	}
 	for _, c := range cases {
 		generatedJWE, err := NewJWE(&c.JOSE, c.pubKey, c.plaintext)
-		switch {
-		case err != nil && !c.isErrorCase:
-			t.Error(err)
-			continue
-		case err != nil && c.isErrorCase:
+		if err != nil {
+			handleErr(t, err, c.isErrorCase)
 			continue
 		}
 		compactJWE, err := generatedJWE.Compact()
-		switch {
-		case err != nil && !c.isErrorCase:
-			t.Error(err)
-			continue
-		case err != nil && c.isErrorCase:
+		if err != nil {
+			handleErr(t, err, c.isErrorCase)
 			continue
 		}
 		receivedJWE, err := ParseCompactJWE(compactJWE)
-		switch {
-		case err != nil && !c.isErrorCase:
-			t.Error(err)
-			continue
-		case err != nil && c.isErrorCase:
+		if err != nil {
+			handleErr(t, err, c.isErrorCase)
 			continue
 		}
 		plaintext, err := receivedJWE.Plaintext(c.privKey)
-		switch {
-		case err != nil && !c.isErrorCase:
-			t.Error(err)
-			continue
-		case err != nil && c.isErrorCase:
+		if err != nil {
+			handleErr(t, err, c.isErrorCase)
 			continue
 		}
 		if !bytes.EqualFold(c.plaintext, plaintext) {
 			t.Errorf("expected %v, got %v", string(c.plaintext), string(plaintext))
 		}
+	}
+}
+
+func handleErr(t *testing.T, err error, isErrCase bool) {
+	if isErrCase {
+		t.Error(err)
 	}
 }
