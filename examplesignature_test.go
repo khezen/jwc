@@ -7,15 +7,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/khezen/jwc"
 )
 
 func ExampleJWT() {
 	var (
 		privateKey, _ = rsa.GenerateKey(rand.Reader, 1024)
-		uid           = uuid.New()
-		jwkid         = jwc.JWKID(uid.String())
+		jwkid         = jwc.JWKID("52d510e3-8d0a-4ef8-a81a-c8cd7ce06472")
 		jwk, _        = jwc.RSAToPublicJWK(&privateKey.PublicKey, jwkid, jwc.PS256, nil)
 		jwkBytes, _   = json.Marshal(jwk)
 	)
@@ -40,15 +38,14 @@ func issueJWT(keyID jwc.JWKID, privateKey *rsa.PrivateKey) string {
 				IssuedAtTimestamp:   nowUnix,
 				ExpirationTimestamp: expUnix,
 				Issuer:              "github.com/khezen/jwc/jwt_test.go",
-				Subject:             "test",
+				Subject:             "customer_id",
+				Audiance:            "android.myapp.com",
 			},
 			PrivateClaims: jwc.PrivateClaims{
-				"tid": uuid.New(),
-				"cid": uuid.New(),
-				"aud": "android.myapp.com",
-				"did": "deviceID",
+				"id":  "token_id",
+				"did": "device_id",
 				"sco": "offline",
-				"cc":  "dummyCodeChallenge",
+				"cc":  "dummy_code_challenge",
 				"ccm": "S256",
 			},
 		},

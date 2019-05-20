@@ -7,15 +7,13 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/khezen/jwc"
 )
 
 func ExampleJWE() {
 	var (
 		privateKey, _     = rsa.GenerateKey(rand.Reader, 2042)
-		uid               = uuid.New()
-		jwkid             = jwc.JWKID(uid.String())
+		jwkid             = jwc.JWKID("52d510e3-8d0a-4ef8-a81a-c8cd7ce06472")
 		publicJWK, _      = jwc.RSAToPublicJWK(&privateKey.PublicKey, jwkid, jwc.ROAEP, nil)
 		publicJWKBytes, _ = json.Marshal(publicJWK)
 		message           = []byte("lorem ipsum ipsa occaecati aut velit facilis enim dolorum id eius magni ducimus sed illum similique cupiditate sit id perferendis alias sint")

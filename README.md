@@ -42,17 +42,16 @@ import (
 )
 
 func main() {
-    var (
-        privateKey, _ = rsa.GenerateKey(rand.Reader, 1024)
-        uid           = uuid.New()
-        jwkid         = jwc.JWKID(uid.String())
-        jwk, _        = jwc.RSAToPublicJWK(&privateKey.PublicKey, jwkid, jwc.PS256, nil)
-        jwkBytes, _   = json.Marshal(jwk)
-    )
-    jwtStr := issueJWT(jwkid, privateKey)
-    token := verify(jwtStr, jwkBytes)
-    fmt.Println(jwtStr)
-    fmt.Println()
+	var (
+		privateKey, _ = rsa.GenerateKey(rand.Reader, 1024)
+		jwkid         = jwc.JWKID("52d510e3-8d0a-4ef8-a81a-c8cd7ce06472")
+		jwk, _        = jwc.RSAToPublicJWK(&privateKey.PublicKey, jwkid, jwc.PS256, nil)
+		jwkBytes, _   = json.Marshal(jwk)
+	)
+	jwtStr := issueJWT(jwkid, privateKey)
+	token := verify(jwtStr, jwkBytes)
+	fmt.Println(jwtStr)
+	fmt.Println()
 	fmt.Println(token)
 }
 
@@ -67,15 +66,14 @@ func issueJWT(keyID jwc.JWKID, privateKey *rsa.PrivateKey) string {
 				IssuedAtTimestamp:   nowUnix,
 				ExpirationTimestamp: expUnix,
 				Issuer:              "github.com/khezen/jwc/jwt_test.go",
-				Subject:             "test",
+				Subject:             "customer_id",
+				Audiance:            "android.myapp.com",
 			},
 			PrivateClaims: jwc.PrivateClaims{
-				"tid": uuid.New(),
-				"cid": uuid.New(),
-				"aud": "android.myapp.com",
-				"did": "deviceID",
+				"id":  "token_id",
+				"did": "device_id",
 				"sco": "offline",
-				"cc":  "dummyCodeChallenge",
+				"cc":  "dummy_code_challenge",
 				"ccm": "S256",
 			},
 		},
@@ -96,7 +94,7 @@ func verify(jwtStr string, jwkBytes []byte) *jwc.JWT {
 	err := json.Unmarshal(jwkBytes, &pubJWK)
 	if err != nil {
 		panic(err)
-	} 
+	}
 	pubKey, err := pubJWK.PublicRSA()
 	if err != nil {
 		panic(err)
@@ -136,8 +134,7 @@ import (
 func main() {
 	var (
 		privateKey, _     = rsa.GenerateKey(rand.Reader, 2042)
-		uid               = uuid.New()
-		jwkid             = jwc.JWKID(uid.String())
+		jwkid         = jwc.JWKID("52d510e3-8d0a-4ef8-a81a-c8cd7ce06472")
 		publicJWK, _      = jwc.RSAToPublicJWK(&privateKey.PublicKey, jwkid, jwc.ROAEP, nil)
 		publicJWKBytes, _ = json.Marshal(publicJWK)
 		message           = []byte("lorem ipsum ipsa occaecati aut velit facilis enim dolorum id eius magni ducimus sed illum similique cupiditate sit id perferendis alias sint")
