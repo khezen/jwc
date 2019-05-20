@@ -80,7 +80,7 @@ type RegisteredClaims struct {
 type PrivateClaims map[string]interface{}
 
 // Encode - encode jwt into signed base64 string
-func (jwt *JWT) Encode(signKeyID JWKID, signKey *rsa.PrivateKey) (string, error) {
+func (jwt *JWT) Encode(signKeyID JWKID, signKey crypto.PrivateKey) (string, error) {
 	jwt.Header.SignKeyID = signKeyID
 	// base64 encoding of the header
 	headerJSON, err := json.Marshal(jwt.Header)
@@ -98,13 +98,13 @@ func (jwt *JWT) Encode(signKeyID JWKID, signKey *rsa.PrivateKey) (string, error)
 	var signature []byte
 	switch jwt.Header.Algorithm {
 	case RS256:
-		signature, err = rsa.SignPKCS1v15(rand.Reader, signKey, crypto.SHA256, hash[:])
+		signature, err = rsa.SignPKCS1v15(rand.Reader, signKey.(*rsa.PrivateKey), crypto.SHA256, hash[:])
 		if err != nil {
 			return "", err
 		}
 		break
 	case PS256:
-		signature, err = rsa.SignPSS(rand.Reader, signKey, crypto.SHA256, hash[:], nil)
+		signature, err = rsa.SignPSS(rand.Reader, signKey.(*rsa.PrivateKey), crypto.SHA256, hash[:], nil)
 		if err != nil {
 			return "", err
 		}
@@ -126,7 +126,7 @@ func ExtractJWTParts(jwtStr string) (headerBase64, payloadBase64, signatureBase6
 }
 
 // VerifyJWT - validate the jwt integerity
-func VerifyJWT(jwtStr string, signKey *rsa.PublicKey) error {
+func VerifyJWT(jwtStr string, signKey crypto.PublicKey) error {
 	headerBase64, payloadBase64, signatureBase64, err := ExtractJWTParts(jwtStr)
 	if err != nil {
 		return err
@@ -137,7 +137,7 @@ func VerifyJWT(jwtStr string, signKey *rsa.PublicKey) error {
 	}
 	return verifyJWT(headerBase64, payloadBase64, signatureBase64, signKey, jwt.Header.Algorithm)
 }
-func verifyJWT(headerBase64, payloadBase64, signatureBase64 string, publicKey *rsa.PublicKey, algo Algorithm) error {
+func verifyJWT(headerBase64, payloadBase64, signatureBase64 string, publicKey crypto.PublicKey, algo Algorithm) error {
 	plainPart := fmt.Sprintf("%s.%s", headerBase64, payloadBase64)
 	hash := sha256.Sum256([]byte(plainPart))
 	signature, err := JWTBase64Encoding.DecodeString(signatureBase64)
@@ -146,9 +146,9 @@ func verifyJWT(headerBase64, payloadBase64, signatureBase64 string, publicKey *r
 	}
 	switch algo {
 	case RS256:
-		return rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, hash[:], signature)
+		return rsa.VerifyPKCS1v15(publicKey.(*rsa.PublicKey), crypto.SHA256, hash[:], signature)
 	case PS256:
-		return rsa.VerifyPSS(publicKey, crypto.SHA256, hash[:], signature, nil)
+		return rsa.VerifyPSS(publicKey.(*rsa.PublicKey), crypto.SHA256, hash[:], signature, nil)
 	default:
 		return ErrUnsupportedAlgorithm
 	}
@@ -189,7 +189,7 @@ func decodeJWT(headerBase64, payloadBase64 string) (*JWT, error) {
 }
 
 // DecodeVerifyJWT - parse a base64 string into a jwt
-func DecodeVerifyJWT(jwtStr string, signKey *rsa.PublicKey) (*JWT, error) {
+func DecodeVerifyJWT(jwtStr string, signKey crypto.PublicKey) (*JWT, error) {
 	headerBase64, payloadBase64, signatureBase64, err := ExtractJWTParts(jwtStr)
 	if err != nil {
 		return nil, err

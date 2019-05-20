@@ -1,14 +1,14 @@
 package jwc
 
 import (
+	"crypto"
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rsa"
 	"encoding/base64"
 	"encoding/json"
 )
 
-func newJWEA128GCM(protectedHeaders *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) (*JWE, error) {
+func newJWEA128GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
 	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(16, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
 		return nil, err
@@ -16,7 +16,7 @@ func newJWEA128GCM(protectedHeaders *JOSEHeaders, pubKey *rsa.PublicKey, plainte
 	return newGCM(cek, cipherCEK, cipherCEKB64, protectedHeaders, pubKey, plaintext)
 }
 
-func newJWEA256GCM(protectedHeaders *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) (*JWE, error) {
+func newJWEA256GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
 	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(32, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
 		return nil, err
@@ -24,7 +24,7 @@ func newJWEA256GCM(protectedHeaders *JOSEHeaders, pubKey *rsa.PublicKey, plainte
 	return newGCM(cek, cipherCEK, cipherCEKB64, protectedHeaders, pubKey, plaintext)
 }
 
-func newJWEA512GCM(protectedHeaders *JOSEHeaders, pubKey *rsa.PublicKey, plaintext []byte) (*JWE, error) {
+func newJWEA512GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
 	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(64, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func newGCM(
 	cipherCEK []byte,
 	cipherCEKB64 string,
 	protectedHeaders *JOSEHeaders,
-	pubKey *rsa.PublicKey,
+	pubKey crypto.PublicKey,
 	plaintext []byte,
 ) (*JWE, error) {
 	headersBytes, err := json.Marshal(protectedHeaders)

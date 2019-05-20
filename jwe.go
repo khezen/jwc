@@ -1,6 +1,7 @@
 package jwc
 
 import (
+	"crypto"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -65,7 +66,7 @@ func (jwe *JWE) Compact() []byte {
 }
 
 // Plaintext returns deciphered content
-func (jwe *JWE) Plaintext(privKey *rsa.PrivateKey) (plaintext []byte, err error) {
+func (jwe *JWE) Plaintext(privKey crypto.PrivateKey) (plaintext []byte, err error) {
 	headersBytes, err := base64.RawURLEncoding.DecodeString(jwe.ProtectedB64)
 	var headers JOSEHeaders
 	err = json.Unmarshal(headersBytes, &headers)
@@ -88,10 +89,11 @@ func (jwe *JWE) Plaintext(privKey *rsa.PrivateKey) (plaintext []byte, err error)
 	if err != nil {
 		return nil, err
 	}
+	plaintext = ciphertext
 	switch headers.Encryption {
 	case A128CBCHS256, A192CBCHS384, A256CBCHS512:
 		mode := cipher.NewCBCDecrypter(block, iv)
-		mode.CryptBlocks(plaintext, ciphertext[aes.BlockSize:])
+		mode.CryptBlocks(plaintext, ciphertext)
 	case A128GCM, A256GCM, A512GCM:
 		mode, err := cipher.NewGCM(block)
 		if err != nil {
@@ -108,10 +110,11 @@ func (jwe *JWE) Plaintext(privKey *rsa.PrivateKey) (plaintext []byte, err error)
 	default:
 		return nil, ErrUnsupportedEncryption
 	}
-	return plaintext, nil
+	plaintext, err = Unpad(plaintext)
+	return plaintext, err
 }
 
-func decipherCEK(alg Algorithm, cipherCEKB64 string, privKey *rsa.PrivateKey) (cek []byte, err error) {
+func decipherCEK(alg Algorithm, cipherCEKB64 string, privKey crypto.PrivateKey) (cek []byte, err error) {
 	cipherCEK, err := base64.RawURLEncoding.DecodeString(cipherCEKB64)
 	if err != nil {
 		return nil, err
@@ -119,9 +122,9 @@ func decipherCEK(alg Algorithm, cipherCEKB64 string, privKey *rsa.PrivateKey) (c
 	rng := rand.Reader
 	switch alg {
 	case RSA15:
-		return rsa.DecryptPKCS1v15(rng, privKey, cipherCEK)
+		return rsa.DecryptPKCS1v15(rng, privKey.(*rsa.PrivateKey), cipherCEK)
 	case ROAEP:
-		return rsa.DecryptOAEP(sha256.New(), rng, privKey, cipherCEK, nil)
+		return rsa.DecryptOAEP(sha256.New(), rng, privKey.(*rsa.PrivateKey), cipherCEK, nil)
 	default:
 		return nil, ErrUnsupportedAlgorithm
 	}
