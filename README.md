@@ -19,8 +19,8 @@ JSON Web Cryptography
     * A192CBC-HS384
     * A256CBC-HS512
     * A128GCM
+    * A192GCM
     * A256GCM
-    * A512GCM
 
 
 ## Example
