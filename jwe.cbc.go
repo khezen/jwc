@@ -43,7 +43,7 @@ func newJWEA128CBCHS256(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, 
 		return nil, err
 	}
 	hashFactory := sha256.New
-	return newCBC(cek, cipherCEK, cipherCEKB64, hashFactory, protectedHeaders, pubKey, plaintext)
+	return newCBC(protectedHeaders, cek, cipherCEK, cipherCEKB64, hashFactory, pubKey, plaintext)
 }
 
 func newJWEA192CBCHS384(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
@@ -52,7 +52,7 @@ func newJWEA192CBCHS384(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, 
 		return nil, err
 	}
 	hashFactory := sha512.New384
-	return newCBC(cek, cipherCEK, cipherCEKB64, hashFactory, protectedHeaders, pubKey, plaintext)
+	return newCBC(protectedHeaders, cek, cipherCEK, cipherCEKB64, hashFactory, pubKey, plaintext)
 }
 func newJWEA256CBCHS512(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
 	cek, cipherCEK, cipherCEKB64, err := generateCEK(48, protectedHeaders.Algorithm, pubKey)
@@ -60,15 +60,15 @@ func newJWEA256CBCHS512(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, 
 		return nil, err
 	}
 	hashFactory := sha512.New
-	return newCBC(cek, cipherCEK, cipherCEKB64, hashFactory, protectedHeaders, pubKey, plaintext)
+	return newCBC(protectedHeaders, cek, cipherCEK, cipherCEKB64, hashFactory, pubKey, plaintext)
 }
 
 func newCBC(
+	protectedHeaders *JOSEHeaders,
 	K []byte,
 	cipherCEK []byte,
 	cipherCEKB64 string,
 	hashFactory func() hash.Hash,
-	protectedHeaders *JOSEHeaders,
 	pubKey crypto.PublicKey,
 	plaintext []byte,
 ) (*JWE, error) {

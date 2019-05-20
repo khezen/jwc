@@ -30,7 +30,7 @@ func newJWEA128GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plain
 	if err != nil {
 		return nil, err
 	}
-	return newGCM(cek, cipherCEK, cipherCEKB64, protectedHeaders, pubKey, plaintext)
+	return newGCM(protectedHeaders, cek, cipherCEK, cipherCEKB64, pubKey, plaintext)
 }
 
 func newJWEA192GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
@@ -38,7 +38,7 @@ func newJWEA192GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plain
 	if err != nil {
 		return nil, err
 	}
-	return newGCM(cek, cipherCEK, cipherCEKB64, protectedHeaders, pubKey, plaintext)
+	return newGCM(protectedHeaders, cek, cipherCEK, cipherCEKB64, pubKey, plaintext)
 }
 
 func newJWEA256GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
@@ -46,14 +46,14 @@ func newJWEA256GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plain
 	if err != nil {
 		return nil, err
 	}
-	return newGCM(cek, cipherCEK, cipherCEKB64, protectedHeaders, pubKey, plaintext)
+	return newGCM(protectedHeaders, cek, cipherCEK, cipherCEKB64, pubKey, plaintext)
 }
 
 func newGCM(
+	protectedHeaders *JOSEHeaders,
 	cek []byte,
 	cipherCEK []byte,
 	cipherCEKB64 string,
-	protectedHeaders *JOSEHeaders,
 	pubKey crypto.PublicKey,
 	plaintext []byte,
 ) (*JWE, error) {
