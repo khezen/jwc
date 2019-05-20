@@ -144,8 +144,7 @@ func main() {
 	)
 	cipher := encrypt(plain, publicJWKBytes)
 	deciphered := decrypt(cipher, privateKey)
-	cmp := bytes.Compare(plain, deciphered)
-	fmt.Println(cmp == 0)
+	fmt.Println(bytes.EqualFold(plain, deciphered))
 }
 
 func encrypt(plain, jwkBytes []byte) []byte {
