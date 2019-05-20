@@ -188,12 +188,10 @@ func GenerateCEK(byteLength int, alg Algorithm, pubKey crypto.PublicKey) (cek []
 	rng := rand.Reader
 	switch alg {
 	case ROAEP:
-		pk := pubKey.(rsa.PublicKey)
-		cipherCEK, err = rsa.EncryptOAEP(sha256.New(), rng, &pk, cek, nil)
+		cipherCEK, err = rsa.EncryptOAEP(sha256.New(), rng, pubKey.(*rsa.PublicKey), cek, nil)
 		break
 	case RSA15:
-		pk := pubKey.(rsa.PublicKey)
-		cipherCEK, err = rsa.EncryptPKCS1v15(rng, &pk, cek)
+		cipherCEK, err = rsa.EncryptPKCS1v15(rng, pubKey.(*rsa.PublicKey), cek)
 		break
 	default:
 		return nil, nil, "", ErrUnsupportedAlgorithm

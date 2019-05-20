@@ -13,12 +13,12 @@ func TestJWE(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	publicKey := privateKey.PublicKey
+	publicKey := &privateKey.PublicKey
 	fakePrivateKey, err := rsa.GenerateKey(rand.Reader, 1024)
 	if err != nil {
 		panic(err)
 	}
-	fakePublicKey := fakePrivateKey.PublicKey
+	fakePublicKey := &fakePrivateKey.PublicKey
 	cases := []struct {
 		plaintext   []byte
 		JOSE        JOSEHeaders
