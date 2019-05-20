@@ -26,7 +26,7 @@ func plaintextGCM(cek, iv, ciphertext, authTag, additionalAuthenticatedData []by
 }
 
 func newJWEA128GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
-	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(16, protectedHeaders.Algorithm, pubKey)
+	cek, cipherCEK, cipherCEKB64, err := generateCEK(16, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +34,7 @@ func newJWEA128GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plain
 }
 
 func newJWEA192GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
-	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(24, protectedHeaders.Algorithm, pubKey)
+	cek, cipherCEK, cipherCEKB64, err := generateCEK(24, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func newJWEA192GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plain
 }
 
 func newJWEA256GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
-	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(32, protectedHeaders.Algorithm, pubKey)
+	cek, cipherCEK, cipherCEKB64, err := generateCEK(32, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
 		return nil, err
 	}
@@ -70,11 +70,11 @@ func newGCM(
 	if err != nil {
 		return nil, err
 	}
-	iv, ivB64, err := GenerateInitVector(mode.NonceSize())
+	iv, ivB64, err := generateInitVector(mode.NonceSize())
 	if err != nil {
 		return nil, err
 	}
-	additionalAuthenticatedData := []byte(String2ASCII(headersB64))
+	additionalAuthenticatedData := []byte(string2ASCII(headersB64))
 	ciphertext := mode.Seal(nil, iv, plaintext, additionalAuthenticatedData)
 	pivot := len(ciphertext) - aes.BlockSize
 	authTag := ciphertext[pivot:]

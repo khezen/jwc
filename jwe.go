@@ -178,8 +178,7 @@ func NewJWE(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []
 	}
 }
 
-// GenerateCEK - generate plaintext encryption key
-func GenerateCEK(byteLength int, alg Algorithm, pubKey crypto.PublicKey) (cek []byte, cipherCEK []byte, cipherCEKB64 string, err error) {
+func generateCEK(byteLength int, alg Algorithm, pubKey crypto.PublicKey) (cek []byte, cipherCEK []byte, cipherCEKB64 string, err error) {
 	cek = make([]byte, byteLength)
 	_, err = rand.Read(cek)
 	if err != nil {
@@ -200,8 +199,7 @@ func GenerateCEK(byteLength int, alg Algorithm, pubKey crypto.PublicKey) (cek []
 	return cek, cipherCEK, cipherCEKB64, nil
 }
 
-// GenerateInitVector -
-func GenerateInitVector(ivLen int) (iv []byte, ivB64 string, err error) {
+func generateInitVector(ivLen int) (iv []byte, ivB64 string, err error) {
 	iv = make([]byte, ivLen)
 	if _, err = io.ReadFull(rand.Reader, iv); err != nil {
 		return nil, "", err
@@ -210,20 +208,20 @@ func GenerateInitVector(ivLen int) (iv []byte, ivB64 string, err error) {
 	return iv, ivB64, err
 }
 
-// String2ASCII - ensure ASCII encoding
-func String2ASCII(s string) string {
+// string2ASCII - ensure ASCII encoding
+func string2ASCII(s string) string {
 	var (
 		buf = new(bytes.Buffer)
 		r   rune
 	)
 	for _, r = range s {
-		buf.WriteRune(Rune2ASCII(r))
+		buf.WriteRune(rune2ASCII(r))
 	}
 	return buf.String()
 }
 
-// Rune2ASCII - ensure ASCII encoding
-func Rune2ASCII(r rune) rune {
+// rune2ASCII - ensure ASCII encoding
+func rune2ASCII(r rune) rune {
 	switch {
 	case 97 <= r && r <= 122:
 		return r - 32

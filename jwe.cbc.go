@@ -38,7 +38,7 @@ func plaintextCBC(K, iv, ciphertext, authTag, additionalAuthenticatedData []byte
 }
 
 func newJWEA128CBCHS256(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
-	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(32, protectedHeaders.Algorithm, pubKey)
+	cek, cipherCEK, cipherCEKB64, err := generateCEK(32, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func newJWEA128CBCHS256(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, 
 }
 
 func newJWEA192CBCHS384(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
-	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(40, protectedHeaders.Algorithm, pubKey)
+	cek, cipherCEK, cipherCEKB64, err := generateCEK(40, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func newJWEA192CBCHS384(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, 
 	return newCBC(cek, cipherCEK, cipherCEKB64, hashFactory, protectedHeaders, pubKey, plaintext)
 }
 func newJWEA256CBCHS512(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
-	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(48, protectedHeaders.Algorithm, pubKey)
+	cek, cipherCEK, cipherCEKB64, err := generateCEK(48, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func newCBC(
 		return nil, err
 	}
 	headersB64 := base64.RawURLEncoding.EncodeToString(headersBytes)
-	iv, ivB64, err := GenerateInitVector(aes.BlockSize)
+	iv, ivB64, err := generateInitVector(aes.BlockSize)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func newCBC(
 	ciphertext := make([]byte, len(plaintext))
 	mode.CryptBlocks(ciphertext, plaintext)
 	ciphertextB64 := base64.RawURLEncoding.EncodeToString(ciphertext)
-	additionalAuthenticatedData := []byte(String2ASCII(headersB64))
+	additionalAuthenticatedData := []byte(string2ASCII(headersB64))
 	authTag := renderCBCAuthTag(additionalAuthenticatedData, iv, ciphertext, hmacKey, hashFactory)
 	authTagB64 := base64.RawURLEncoding.EncodeToString(authTag)
 	jwe := JWE{
