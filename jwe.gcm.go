@@ -17,8 +17,8 @@ func plaintextGCM(cek, iv, ciphertext, authTag, additionalAuthenticatedData []by
 	if err != nil {
 		return nil, err
 	}
-	ciphertext = append(ciphertext, authTag...)
-	plaintext, err = mode.Open(nil, iv, ciphertext, additionalAuthenticatedData)
+	registrationKey := append(ciphertext, authTag...)
+	plaintext, err = mode.Open(nil, iv, registrationKey, additionalAuthenticatedData)
 	if err != nil {
 		return nil, err
 	}
