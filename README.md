@@ -126,7 +126,6 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 
@@ -159,19 +158,20 @@ func encrypt(plain, jwkBytes []byte) []byte {
 	if err != nil {
 		panic(err)
 	}
-	hash := sha256.New()
-	label := []byte{}
-	cipher, err := rsa.EncryptOAEP(hash, rand.Reader, pubKey, plain, label)
+	jwe, err := jwc.NewJWE(
+		&jwc.JOSEHeaders{Algorithm: jwc.ROAEP, Encryption: jwc.A256GCM},
+		pubKey,
+		plain,
+	)
+	return jwe.Compact()
+}
+
+func decrypt(compactJWE []byte, privateKey *rsa.PrivateKey) []byte {
+	jwe, err := jwc.ParseCompactJWE(compactJWE)
 	if err != nil {
 		panic(err)
 	}
-	return cipher
-}
-
-func decrypt(cipher []byte, privateKey *rsa.PrivateKey) []byte {
-	hash := sha256.New()
-	label := []byte{}
-	plain, err := rsa.DecryptOAEP(hash, rand.Reader, privateKey, cipher, label)
+	plain, err := jwe.Plaintext(privateKey)
 	if err != nil {
 		panic(err)
 	}

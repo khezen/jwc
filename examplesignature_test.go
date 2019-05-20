@@ -11,7 +11,7 @@ import (
 	"github.com/khezen/jwc"
 )
 
-func ExamplePS256() {
+func ExampleJWT() {
 	var (
 		privateKey, _ = rsa.GenerateKey(rand.Reader, 1024)
 		uid           = uuid.New()
