@@ -41,7 +41,11 @@ func encrypt(plain, jwkBytes []byte) []byte {
 		pubKey,
 		plain,
 	)
-	return jwe.Compact()
+	jweString, err := jwe.Compact()
+	if err != nil {
+		panic(err)
+	}
+	return jweString
 }
 
 func decrypt(compactJWE []byte, privateKey *rsa.PrivateKey) []byte {

@@ -113,7 +113,14 @@ func TestJWE(t *testing.T) {
 		case err != nil && c.isErrorCase:
 			continue
 		}
-		compactJWE := generatedJWE.Compact()
+		compactJWE, err := generatedJWE.Compact()
+		switch {
+		case err != nil && !c.isErrorCase:
+			t.Error(err)
+			continue
+		case err != nil && c.isErrorCase:
+			continue
+		}
 		receivedJWE, err := ParseCompactJWE(compactJWE)
 		switch {
 		case err != nil && !c.isErrorCase:

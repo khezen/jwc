@@ -46,8 +46,23 @@ type JWE struct {
 }
 
 // Compact formats to the JWE compact serialisation
-func (jwe *JWE) Compact() []byte {
+func (jwe *JWE) Compact() ([]byte, error) {
 	if len(jwe.TagB64) > 0 {
+		protectedHeadersBytes, err := base64.RawURLEncoding.DecodeString(jwe.ProtectedB64)
+		if err != nil {
+			return nil, err
+		}
+		var protectedHeaders JOSEHeaders
+		err = json.Unmarshal(protectedHeadersBytes, &protectedHeaders)
+		if err != nil {
+			return nil, err
+		}
+		protectedHeaders.AdditionalAuthenticatedDataB64 = base64.RawURLEncoding.EncodeToString([]byte(jwe.AdditionalAuthenticatedData))
+		protectedHeadersBytes, err = json.Marshal(protectedHeaders)
+		if err != nil {
+			return nil, err
+		}
+		jwe.ProtectedB64 = base64.RawURLEncoding.EncodeToString(protectedHeadersBytes)
 		return []byte(fmt.Sprintf(
 			"%s.%s.%s.%s.%s",
 			jwe.ProtectedB64,
@@ -55,7 +70,7 @@ func (jwe *JWE) Compact() []byte {
 			jwe.InitVectorB64,
 			jwe.CiphertextB64,
 			jwe.TagB64,
-		))
+		)), nil
 	}
 	return []byte(fmt.Sprintf(
 		"%s.%s.%s.%s",
@@ -63,7 +78,7 @@ func (jwe *JWE) Compact() []byte {
 		jwe.CipherCEKB64,
 		jwe.InitVectorB64,
 		jwe.CiphertextB64,
-	))
+	)), nil
 }
 
 // Plaintext returns deciphered content
