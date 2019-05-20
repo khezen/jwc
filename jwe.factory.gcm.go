@@ -58,6 +58,12 @@ func newGCM(
 		return nil, err
 	}
 	additionalAuthenticatedData := []byte(String2ASCII(headersB64))
+	protectedHeaders.AdditionalAuthenticatedDataB64 = base64.RawURLEncoding.EncodeToString(additionalAuthenticatedData)
+	headersBytes, err = json.Marshal(protectedHeaders)
+	if err != nil {
+		return nil, err
+	}
+	headersB64 = base64.RawURLEncoding.EncodeToString(headersBytes)
 	ciphertext := mode.Seal(nil, iv, plaintext, additionalAuthenticatedData)
 	pivot := len(ciphertext) - aes.BlockSize
 	authTag := ciphertext[pivot:]

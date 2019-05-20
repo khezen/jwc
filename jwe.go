@@ -22,15 +22,16 @@ var (
 
 // JOSEHeaders JWE header
 type JOSEHeaders struct {
-	Algorithm   Algorithm               `json:"alg"`
-	Encryption  ContentEncryptAlgorithm `json:"enc"`
-	Type        string                  `json:"typ,omitempty"`
-	ContentType string                  `json:"cty,omitempty"`
-	KeyID       JWKID                   `json:"kid,omitempty"`
-	JWKURI      string                  `json:"jku,omitempty"`
-	JWK         *JWK                    `json:"jwk,omitmepty"`
-	Zip         string                  `json:"zip,omitempty"`
-	Critical    []string                `jon:"crit,omitempty"`
+	Algorithm                      Algorithm               `json:"alg"`
+	Encryption                     ContentEncryptAlgorithm `json:"enc"`
+	AdditionalAuthenticatedDataB64 string                  `json:"aad,omitempty"`
+	Type                           string                  `json:"typ,omitempty"`
+	ContentType                    string                  `json:"cty,omitempty"`
+	KeyID                          JWKID                   `json:"kid,omitempty"`
+	JWKURI                         string                  `json:"jku,omitempty"`
+	JWK                            *JWK                    `json:"jwk,omitmepty"`
+	Zip                            string                  `json:"zip,omitempty"`
+	Critical                       []string                `jon:"crit,omitempty"`
 }
 
 // JWE -
@@ -94,7 +95,11 @@ func (jwe *JWE) Plaintext(privKey crypto.PrivateKey) (plaintext []byte, err erro
 	case A128CBCHS256, A192CBCHS384, A256CBCHS512:
 		mode := cipher.NewCBCDecrypter(block, iv)
 		mode.CryptBlocks(plaintext, ciphertext)
-	case A128GCM, A256GCM, A512GCM:
+		plaintext, err = Unpad(plaintext)
+		if err != nil {
+			return nil, err
+		}
+	case A128GCM, A256GCM:
 		mode, err := cipher.NewGCM(block)
 		if err != nil {
 			return nil, err
@@ -103,15 +108,19 @@ func (jwe *JWE) Plaintext(privKey crypto.PrivateKey) (plaintext []byte, err erro
 		if err != nil {
 			return nil, err
 		}
-		plaintext, err = mode.Open(nil, iv, ciphertext, authTag)
+		ciphertext = append(ciphertext, authTag...)
+		additionalAuthenticatedData, err := base64.RawURLEncoding.DecodeString(headers.AdditionalAuthenticatedDataB64)
+		if err != nil {
+			return nil, err
+		}
+		plaintext, err = mode.Open(nil, iv, ciphertext, additionalAuthenticatedData)
 		if err != nil {
 			return nil, err
 		}
 	default:
 		return nil, ErrUnsupportedEncryption
 	}
-	plaintext, err = Unpad(plaintext)
-	return plaintext, err
+	return plaintext, nil
 }
 
 func decipherCEK(alg Algorithm, cipherCEKB64 string, privKey crypto.PrivateKey) (cek []byte, err error) {

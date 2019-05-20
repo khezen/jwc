@@ -48,7 +48,5 @@ const (
 	// A256GCM - A256GCM
 	A256GCM ContentEncryptAlgorithm = "A256GCM"
 	// A512GCM - A512GCM
-	A512GCM ContentEncryptAlgorithm = "A512GCM"
-	// ECDHES - ECDH-ES
-	ECDHES ContentEncryptAlgorithm = "ECDH-ES"
+	// A512GCM ContentEncryptAlgorithm = "A512GCM"
 )
