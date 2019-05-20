@@ -8,6 +8,23 @@ import (
 	"encoding/json"
 )
 
+func plaintextGCM(cek, iv, ciphertext, authTag, additionalAuthenticatedData []byte) (plaintext []byte, err error) {
+	block, err := aes.NewCipher(cek)
+	if err != nil {
+		return nil, err
+	}
+	mode, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
+	}
+	ciphertext = append(ciphertext, authTag...)
+	plaintext, err = mode.Open(nil, iv, ciphertext, additionalAuthenticatedData)
+	if err != nil {
+		return nil, err
+	}
+	return plaintext, nil
+}
+
 func newJWEA128GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
 	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(16, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
@@ -58,11 +75,6 @@ func newGCM(
 		return nil, err
 	}
 	additionalAuthenticatedData := []byte(String2ASCII(headersB64))
-	headersBytes, err = json.Marshal(protectedHeaders)
-	if err != nil {
-		return nil, err
-	}
-	headersB64 = base64.RawURLEncoding.EncodeToString(headersBytes)
 	ciphertext := mode.Seal(nil, iv, plaintext, additionalAuthenticatedData)
 	pivot := len(ciphertext) - aes.BlockSize
 	authTag := ciphertext[pivot:]

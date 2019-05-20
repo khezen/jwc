@@ -2,11 +2,10 @@ package jwc
 
 import (
 	"crypto"
-	"crypto/aes"
-	"crypto/cipher"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -47,37 +46,28 @@ type JWE struct {
 
 // Compact formats to the JWE compact serialisation
 func (jwe *JWE) Compact() ([]byte, error) {
-	if len(jwe.TagB64) > 0 {
-		protectedHeadersBytes, err := base64.RawURLEncoding.DecodeString(jwe.ProtectedB64)
-		if err != nil {
-			return nil, err
-		}
-		var protectedHeaders JOSEHeaders
-		err = json.Unmarshal(protectedHeadersBytes, &protectedHeaders)
-		if err != nil {
-			return nil, err
-		}
-		protectedHeaders.AdditionalAuthenticatedDataB64 = base64.RawURLEncoding.EncodeToString([]byte(jwe.AdditionalAuthenticatedData))
-		protectedHeadersBytes, err = json.Marshal(protectedHeaders)
-		if err != nil {
-			return nil, err
-		}
-		jwe.ProtectedB64 = base64.RawURLEncoding.EncodeToString(protectedHeadersBytes)
-		return []byte(fmt.Sprintf(
-			"%s.%s.%s.%s.%s",
-			jwe.ProtectedB64,
-			jwe.CipherCEKB64,
-			jwe.InitVectorB64,
-			jwe.CiphertextB64,
-			jwe.TagB64,
-		)), nil
+	protectedHeadersBytes, err := base64.RawURLEncoding.DecodeString(jwe.ProtectedB64)
+	if err != nil {
+		return nil, err
 	}
+	var protectedHeaders JOSEHeaders
+	err = json.Unmarshal(protectedHeadersBytes, &protectedHeaders)
+	if err != nil {
+		return nil, err
+	}
+	protectedHeaders.AdditionalAuthenticatedDataB64 = base64.RawURLEncoding.EncodeToString([]byte(jwe.AdditionalAuthenticatedData))
+	protectedHeadersBytes, err = json.Marshal(protectedHeaders)
+	if err != nil {
+		return nil, err
+	}
+	jwe.ProtectedB64 = base64.RawURLEncoding.EncodeToString(protectedHeadersBytes)
 	return []byte(fmt.Sprintf(
-		"%s.%s.%s.%s",
+		"%s.%s.%s.%s.%s",
 		jwe.ProtectedB64,
 		jwe.CipherCEKB64,
 		jwe.InitVectorB64,
 		jwe.CiphertextB64,
+		jwe.TagB64,
 	)), nil
 }
 
@@ -101,41 +91,24 @@ func (jwe *JWE) Plaintext(privKey crypto.PrivateKey) (plaintext []byte, err erro
 	if err != nil {
 		return nil, err
 	}
-	block, err := aes.NewCipher(cek)
+
+	authTag, err := base64.RawURLEncoding.DecodeString(jwe.TagB64)
 	if err != nil {
 		return nil, err
 	}
 	plaintext = ciphertext
 	switch headers.Encryption {
-	case A128CBCHS256, A192CBCHS384, A256CBCHS512:
-		mode := cipher.NewCBCDecrypter(block, iv)
-		mode.CryptBlocks(plaintext, ciphertext)
-		plaintext, err = Unpad(plaintext)
-		if err != nil {
-			return nil, err
-		}
+	case A128CBCHS256:
+		return plaintextCBC(cek, iv, ciphertext, authTag, []byte(jwe.AdditionalAuthenticatedData), sha256.New)
+	case A192CBCHS384:
+		return plaintextCBC(cek, iv, ciphertext, authTag, []byte(jwe.AdditionalAuthenticatedData), sha512.New384)
+	case A256CBCHS512:
+		return plaintextCBC(cek, iv, ciphertext, authTag, []byte(jwe.AdditionalAuthenticatedData), sha512.New)
 	case A128GCM, A192GCM, A256GCM:
-		mode, err := cipher.NewGCM(block)
-		if err != nil {
-			return nil, err
-		}
-		authTag, err := base64.RawURLEncoding.DecodeString(jwe.TagB64)
-		if err != nil {
-			return nil, err
-		}
-		ciphertext = append(ciphertext, authTag...)
-		additionalAuthenticatedData, err := base64.RawURLEncoding.DecodeString(headers.AdditionalAuthenticatedDataB64)
-		if err != nil {
-			return nil, err
-		}
-		plaintext, err = mode.Open(nil, iv, ciphertext, additionalAuthenticatedData)
-		if err != nil {
-			return nil, err
-		}
+		return plaintextGCM(cek, iv, ciphertext, authTag, []byte(jwe.AdditionalAuthenticatedData))
 	default:
 		return nil, ErrUnsupportedEncryption
 	}
-	return plaintext, nil
 }
 
 func decipherCEK(alg Algorithm, cipherCEKB64 string, privKey crypto.PrivateKey) (cek []byte, err error) {

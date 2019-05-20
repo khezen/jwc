@@ -7,7 +7,7 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/base64"
-	"errors"
+	"encoding/json"
 	"io"
 	"strings"
 )
@@ -16,22 +16,27 @@ import (
 func ParseCompactJWE(compact []byte) (jwe *JWE, err error) {
 	var (
 		jweFragments = strings.Split(string(compact), ".")
-		tagB64       string
 	)
-	switch len(jweFragments) {
-	case 4:
-		break
-	case 5:
-		tagB64 = jweFragments[4]
-	default:
-		return nil, ErrCompactJWEUnparsable
+	headersBytes, err := base64.RawURLEncoding.DecodeString(jweFragments[0])
+	if err != nil {
+		return nil, err
+	}
+	var headers JOSEHeaders
+	err = json.Unmarshal(headersBytes, &headers)
+	if err != nil {
+		return nil, err
+	}
+	additionalAuthenticatedData, err := base64.RawURLEncoding.DecodeString(headers.AdditionalAuthenticatedDataB64)
+	if err != nil {
+		return nil, err
 	}
 	return &JWE{
-		ProtectedB64:  jweFragments[0],
-		CipherCEKB64:  jweFragments[1],
-		InitVectorB64: jweFragments[2],
-		CiphertextB64: jweFragments[3],
-		TagB64:        tagB64,
+		ProtectedB64:                jweFragments[0],
+		AdditionalAuthenticatedData: string(additionalAuthenticatedData),
+		CipherCEKB64:                jweFragments[1],
+		InitVectorB64:               jweFragments[2],
+		CiphertextB64:               jweFragments[3],
+		TagB64:                      jweFragments[4],
 	}, nil
 }
 
@@ -111,21 +116,4 @@ func Rune2ASCII(r rune) rune {
 	default:
 		return r
 	}
-}
-
-// Pad -
-func Pad(src []byte, blockSize int) []byte {
-	padding := blockSize - len(src)%blockSize
-	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(src, padtext...)
-}
-
-// Unpad -
-func Unpad(src []byte) ([]byte, error) {
-	length := len(src)
-	unpadding := int(src[length-1])
-	if unpadding > length {
-		return nil, errors.New("unpad error. This could happen when incorrect encryption key is used")
-	}
-	return src[:(length - unpadding)], nil
 }
