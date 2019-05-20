@@ -40,6 +40,9 @@ func encrypt(plain, jwkBytes []byte) []byte {
 		pubKey,
 		plain,
 	)
+	if err != nil {
+		panic(err)
+	}
 	jweString, err := jwe.Compact()
 	if err != nil {
 		panic(err)
