@@ -45,8 +45,8 @@ const (
 	A256CBCHS512 ContentEncryptAlgorithm = "A256CBC-HS512"
 	// A128GCM - A128GCM
 	A128GCM ContentEncryptAlgorithm = "A128GCM"
+	// A192GCM - A192GCM
+	A192GCM ContentEncryptAlgorithm = "A192GCM"
 	// A256GCM - A256GCM
 	A256GCM ContentEncryptAlgorithm = "A256GCM"
-	// A512GCM - A512GCM
-	// A512GCM ContentEncryptAlgorithm = "A512GCM"
 )

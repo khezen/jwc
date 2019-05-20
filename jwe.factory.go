@@ -46,10 +46,10 @@ func NewJWE(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []
 		return newJWEA256CBCHS512(protectedHeaders, pubKey, plaintext)
 	case A128GCM:
 		return newJWEA128GCM(protectedHeaders, pubKey, plaintext)
+	case A192GCM:
+		return newJWEA192GCM(protectedHeaders, pubKey, plaintext)
 	case A256GCM:
 		return newJWEA256GCM(protectedHeaders, pubKey, plaintext)
-	// case A512GCM:
-	// 	return newJWEA512GCM(protectedHeaders, pubKey, plaintext)
 	default:
 		return nil, ErrUnsupportedEncryption
 	}

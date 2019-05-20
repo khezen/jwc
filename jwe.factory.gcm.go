@@ -16,6 +16,14 @@ func newJWEA128GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plain
 	return newGCM(cek, cipherCEK, cipherCEKB64, protectedHeaders, pubKey, plaintext)
 }
 
+func newJWEA192GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
+	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(24, protectedHeaders.Algorithm, pubKey)
+	if err != nil {
+		return nil, err
+	}
+	return newGCM(cek, cipherCEK, cipherCEKB64, protectedHeaders, pubKey, plaintext)
+}
+
 func newJWEA256GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
 	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(32, protectedHeaders.Algorithm, pubKey)
 	if err != nil {
@@ -23,14 +31,6 @@ func newJWEA256GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plain
 	}
 	return newGCM(cek, cipherCEK, cipherCEKB64, protectedHeaders, pubKey, plaintext)
 }
-
-// func newJWEA512GCM(protectedHeaders *JOSEHeaders, pubKey crypto.PublicKey, plaintext []byte) (*JWE, error) {
-// 	cek, cipherCEK, cipherCEKB64, err := GenerateCEK(64, protectedHeaders.Algorithm, pubKey)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return newGCM(cek, cipherCEK, cipherCEKB64, protectedHeaders, pubKey, plaintext)
-// }
 
 func newGCM(
 	cek []byte,

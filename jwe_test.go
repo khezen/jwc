@@ -63,18 +63,18 @@ func TestJWE(t *testing.T) {
 		},
 		{
 			[]byte("I have a message for you."),
+			JOSEHeaders{Algorithm: ROAEP, Encryption: A192GCM},
+			publicKey,
+			privateKey,
+			false,
+		},
+		{
+			[]byte("I have a message for you."),
 			JOSEHeaders{Algorithm: ROAEP, Encryption: A256GCM},
 			publicKey,
 			privateKey,
 			false,
 		},
-		// {
-		// 	[]byte("I have a message for you."),
-		// 	JOSEHeaders{Algorithm: ROAEP, Encryption: A512GCM},
-		// 	publicKey,
-		// 	privateKey,
-		// 	false,
-		// },
 		{
 			[]byte("I have a message for you."),
 			JOSEHeaders{Algorithm: PS256, Encryption: A128CBCHS256},

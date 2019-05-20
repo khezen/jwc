@@ -99,7 +99,7 @@ func (jwe *JWE) Plaintext(privKey crypto.PrivateKey) (plaintext []byte, err erro
 		if err != nil {
 			return nil, err
 		}
-	case A128GCM, A256GCM:
+	case A128GCM, A192GCM, A256GCM:
 		mode, err := cipher.NewGCM(block)
 		if err != nil {
 			return nil, err
