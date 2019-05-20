@@ -18,14 +18,14 @@ func ExampleJWE() {
 		jwkid             = jwc.JWKID(uid.String())
 		publicJWK, _      = jwc.RSAToPublicJWK(&privateKey.PublicKey, jwkid, jwc.ROAEP, nil)
 		publicJWKBytes, _ = json.Marshal(publicJWK)
-		plain             = []byte("lorem ipsum ipsa occaecati aut velit facilis enim dolorum id eius magni ducimus sed illum similique cupiditate sit id perferendis alias sint")
+		message           = []byte("lorem ipsum ipsa occaecati aut velit facilis enim dolorum id eius magni ducimus sed illum similique cupiditate sit id perferendis alias sint")
 	)
-	cipher := encrypt(plain, publicJWKBytes)
-	deciphered := decrypt(cipher, privateKey)
-	fmt.Println(bytes.EqualFold(plain, deciphered))
+	compactJWE := encrypt(message, publicJWKBytes)
+	plaintext := decrypt(compactJWE, privateKey)
+	fmt.Println(bytes.EqualFold(message, plaintext))
 }
 
-func encrypt(plain, jwkBytes []byte) []byte {
+func encrypt(plaintext, jwkBytes []byte) []byte {
 	var jwk jwc.RSAPublicJWK
 	err := json.Unmarshal(jwkBytes, &jwk)
 	if err != nil {
@@ -38,7 +38,7 @@ func encrypt(plain, jwkBytes []byte) []byte {
 	jwe, err := jwc.NewJWE(
 		&jwc.JOSEHeaders{Algorithm: jwc.ROAEP, Encryption: jwc.A256GCM},
 		pubKey,
-		plain,
+		plaintext,
 	)
 	if err != nil {
 		panic(err)
@@ -55,9 +55,9 @@ func decrypt(compactJWE []byte, privateKey *rsa.PrivateKey) []byte {
 	if err != nil {
 		panic(err)
 	}
-	plain, err := jwe.Plaintext(privateKey)
+	plaintext, err := jwe.Plaintext(privateKey)
 	if err != nil {
 		panic(err)
 	}
-	return plain
+	return plaintext
 }
