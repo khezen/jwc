@@ -132,7 +132,7 @@ func TestJWE(t *testing.T) {
 }
 
 func handleErr(t *testing.T, err error, isErrCase bool) {
-	if isErrCase {
+	if !isErrCase {
 		t.Error(err)
 	}
 }

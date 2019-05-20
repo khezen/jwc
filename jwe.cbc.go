@@ -18,10 +18,7 @@ import (
 
 func plaintextCBC(K, iv, ciphertext, authTag, additionalAuthenticatedData []byte, hashFactory func() hash.Hash) (plaintext []byte, err error) {
 	hmacKey := K[:16]
-	additionalAuthenticatedDataLen := len(additionalAuthenticatedData)
-	var additionalAuthenticatedDataLenBigEndian = make([]byte, 32)
-	binary.BigEndian.PutUint32(additionalAuthenticatedDataLenBigEndian, uint32(additionalAuthenticatedDataLen))
-	authTagVerifier := hmac.New(hashFactory, hmacKey).Sum(append(append(append(additionalAuthenticatedData, iv...), ciphertext...), additionalAuthenticatedDataLenBigEndian...))[:16]
+	authTagVerifier := renderCBCAuthTag(additionalAuthenticatedData, iv, ciphertext, hmacKey, hashFactory)
 	if !bytes.EqualFold(authTagVerifier, authTag) {
 		return nil, fmt.Errorf("unable to authenticate data")
 	}
@@ -96,10 +93,7 @@ func newCBC(
 	mode.CryptBlocks(ciphertext, plaintext)
 	ciphertextB64 := base64.RawURLEncoding.EncodeToString(ciphertext)
 	additionalAuthenticatedData := []byte(String2ASCII(headersB64))
-	additionalAuthenticatedDataLen := len(additionalAuthenticatedData)
-	additionalAuthenticatedDataLenBigEndian := make([]byte, 32)
-	binary.BigEndian.PutUint32(additionalAuthenticatedDataLenBigEndian, uint32(additionalAuthenticatedDataLen))
-	authTag := hmac.New(hashFactory, hmacKey).Sum(append(append(append(additionalAuthenticatedData, iv...), ciphertext...), additionalAuthenticatedDataLenBigEndian...))[:16]
+	authTag := renderCBCAuthTag(additionalAuthenticatedData, iv, ciphertext, hmacKey, hashFactory)
 	authTagB64 := base64.RawURLEncoding.EncodeToString(authTag)
 	jwe := JWE{
 		ProtectedB64:                headersB64,
@@ -110,6 +104,14 @@ func newCBC(
 		TagB64:                      authTagB64,
 	}
 	return &jwe, nil
+}
+
+func renderCBCAuthTag(additionalAuthenticatedData, iv, ciphertext, hmacKey []byte, hashFactory func() hash.Hash) (authTag []byte) {
+	additionalAuthenticatedDataLen := len(additionalAuthenticatedData)
+	additionalAuthenticatedDataLenBigEndian := make([]byte, 32)
+	binary.BigEndian.PutUint32(additionalAuthenticatedDataLenBigEndian, uint32(additionalAuthenticatedDataLen))
+	authTag = hmac.New(hashFactory, hmacKey).Sum(append(append(append(additionalAuthenticatedData, iv...), ciphertext...), additionalAuthenticatedDataLenBigEndian...))[:16]
+	return authTag
 }
 
 // Pad -
