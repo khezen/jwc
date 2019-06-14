@@ -31,9 +31,9 @@ type JOSEHeaders struct {
 	ContentType                    string                  `json:"cty,omitempty"`
 	KeyID                          JWKID                   `json:"kid,omitempty"`
 	JWKURI                         string                  `json:"jku,omitempty"`
-	JWK                            *JWK                    `json:"jwk,omitmepty"`
+	JWK                            *JWK                    `json:"jwk,omitempty"`
 	Zip                            string                  `json:"zip,omitempty"`
-	Critical                       []string                `jon:"crit,omitempty"`
+	Critical                       []string                `json:"crit,omitempty"`
 }
 
 // JWE -
