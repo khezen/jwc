@@ -53,7 +53,7 @@ func RSAToPublicJWK(publicKey *rsa.PublicKey, jwkID JWKID, algo Algorithm, expir
 	publicThumbprintBase64 := base64.RawURLEncoding.EncodeToString(publicThumbprint[:])
 	modulusBase64 := base64.RawURLEncoding.EncodeToString(publicKey.N.Bytes())
 	expBuf := new(bytes.Buffer)
-	binary.Write(expBuf, binary.LittleEndian, uint32(publicKey.E))
+	binary.Write(expBuf, binary.LittleEndian, uint64(publicKey.E))
 	expBytes := bytes.TrimRight(expBuf.Bytes(), "\x00")
 	publicExponentBase64 := base64.RawURLEncoding.EncodeToString(expBytes)
 	var usage Usage
@@ -92,10 +92,10 @@ func (jwk *RSAPublicJWK) PublicRSA() (*rsa.PublicKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	for len(publicExponentBytes) < 4 {
+	for len(publicExponentBytes) < 8 {
 		publicExponentBytes = append(publicExponentBytes, 0)
 	}
-	publicExponent := int(binary.LittleEndian.Uint32(publicExponentBytes))
+	publicExponent := int(binary.LittleEndian.Uint64(publicExponentBytes))
 	rsaPublicKey := rsa.PublicKey{
 		N: modulus,
 		E: publicExponent,
@@ -142,7 +142,7 @@ func RSAToPrivateJWK(privateKey *rsa.PrivateKey, jwkID JWKID, algo Algorithm, ex
 	privateThumbprintBase64 := base64.RawURLEncoding.EncodeToString(privateThumbprint[:])
 	modulusBase64 := base64.RawURLEncoding.EncodeToString(privateKey.PublicKey.N.Bytes())
 	expBuf := new(bytes.Buffer)
-	binary.Write(expBuf, binary.LittleEndian, uint32(privateKey.PublicKey.E))
+	binary.Write(expBuf, binary.LittleEndian, uint64(privateKey.PublicKey.E))
 	expBytes := bytes.TrimRight(expBuf.Bytes(), "\x00")
 	publicExponentBase64 := base64.RawURLEncoding.EncodeToString(expBytes)
 	privateExponentBase64 := base64.RawURLEncoding.EncodeToString(privateKey.D.Bytes())
@@ -197,10 +197,10 @@ func (jwk *RSAPrivateJWK) PrivateRSA() (*rsa.PrivateKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	for len(publicExponentBytes) < 4 {
+	for len(publicExponentBytes) < 8 {
 		publicExponentBytes = append(publicExponentBytes, 0)
 	}
-	publicExponent := int(binary.LittleEndian.Uint32(publicExponentBytes))
+	publicExponent := int(binary.LittleEndian.Uint64(publicExponentBytes))
 	privateExponentBytes, err := base64.RawURLEncoding.DecodeString(jwk.PrivateExponentBase64)
 	if err != nil {
 		return nil, err
