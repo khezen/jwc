@@ -47,7 +47,7 @@ func RSAToPublicJWK(publicKey *rsa.PublicKey, jwkID JWKID, algo Algorithm, expir
 	if err != nil {
 		return nil, err
 	}
-	publicX509DERBase64 := base64.RawURLEncoding.EncodeToString(publicX509DER)
+	publicX509DERBase64 := base64.RawStdEncoding.EncodeToString(publicX509DER)
 	publicThumbprint := sha1.Sum(publicX509DER)
 	publicThumbprintBase64 := base64.RawURLEncoding.EncodeToString(publicThumbprint[:])
 	modulusBase64 := base64.RawURLEncoding.EncodeToString(publicKey.N.Bytes())
@@ -132,7 +132,7 @@ func (jwk *RSAPrivateJWK) PublicKey() *RSAPublicJWK {
 // RSAToPrivateJWK - takes rsa private key and returns it as JWK
 func RSAToPrivateJWK(privateKey *rsa.PrivateKey, jwkID JWKID, algo Algorithm, expirationTime *time.Time) (*RSAPrivateJWK, error) {
 	privateX509DER := x509.MarshalPKCS1PrivateKey(privateKey)
-	privateX509DERBase64 := base64.RawURLEncoding.EncodeToString(privateX509DER)
+	privateX509DERBase64 := base64.RawStdEncoding.EncodeToString(privateX509DER)
 	privateThumbprint := sha1.Sum(privateX509DER)
 	privateThumbprintBase64 := base64.RawURLEncoding.EncodeToString(privateThumbprint[:])
 	modulusBase64 := base64.RawURLEncoding.EncodeToString(privateKey.PublicKey.N.Bytes())
