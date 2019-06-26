@@ -3,6 +3,7 @@ package jwc
 // https://tools.ietf.org/html/rfc7517
 
 import (
+	"bytes"
 	"crypto/rsa"
 	"crypto/sha1"
 	"crypto/x509"
@@ -51,8 +52,9 @@ func RSAToPublicJWK(publicKey *rsa.PublicKey, jwkID JWKID, algo Algorithm, expir
 	publicThumbprint := sha1.Sum(publicX509DER)
 	publicThumbprintBase64 := base64.RawURLEncoding.EncodeToString(publicThumbprint[:])
 	modulusBase64 := base64.RawURLEncoding.EncodeToString(publicKey.N.Bytes())
-	expBytes := make([]byte, 4)
-	binary.LittleEndian.PutUint32(expBytes, uint32(publicKey.E))
+	expBuf := new(bytes.Buffer)
+	binary.Write(expBuf, binary.LittleEndian, uint32(publicKey.E))
+	expBytes := bytes.TrimRight(expBuf.Bytes(), "\x00")
 	publicExponentBase64 := base64.RawURLEncoding.EncodeToString(expBytes)
 	var usage Usage
 	switch algo {
@@ -89,6 +91,9 @@ func (jwk *RSAPublicJWK) PublicRSA() (*rsa.PublicKey, error) {
 	publicExponentBytes, err := base64.RawURLEncoding.DecodeString(jwk.PublicExponentBase64)
 	if err != nil {
 		return nil, err
+	}
+	for len(publicExponentBytes) < 4 {
+		publicExponentBytes = append(publicExponentBytes, 0)
 	}
 	publicExponent := int(binary.LittleEndian.Uint32(publicExponentBytes))
 	rsaPublicKey := rsa.PublicKey{
@@ -136,8 +141,9 @@ func RSAToPrivateJWK(privateKey *rsa.PrivateKey, jwkID JWKID, algo Algorithm, ex
 	privateThumbprint := sha1.Sum(privateX509DER)
 	privateThumbprintBase64 := base64.RawURLEncoding.EncodeToString(privateThumbprint[:])
 	modulusBase64 := base64.RawURLEncoding.EncodeToString(privateKey.PublicKey.N.Bytes())
-	expBytes := make([]byte, 4)
-	binary.LittleEndian.PutUint32(expBytes, uint32(privateKey.PublicKey.E))
+	expBuf := new(bytes.Buffer)
+	binary.Write(expBuf, binary.LittleEndian, uint32(privateKey.PublicKey.E))
+	expBytes := bytes.TrimRight(expBuf.Bytes(), "\x00")
 	publicExponentBase64 := base64.RawURLEncoding.EncodeToString(expBytes)
 	privateExponentBase64 := base64.RawURLEncoding.EncodeToString(privateKey.D.Bytes())
 	firstPrimeFactor := privateKey.Primes[0]
@@ -190,6 +196,9 @@ func (jwk *RSAPrivateJWK) PrivateRSA() (*rsa.PrivateKey, error) {
 	publicExponentBytes, err := base64.RawURLEncoding.DecodeString(jwk.PublicExponentBase64)
 	if err != nil {
 		return nil, err
+	}
+	for len(publicExponentBytes) < 4 {
+		publicExponentBytes = append(publicExponentBytes, 0)
 	}
 	publicExponent := int(binary.LittleEndian.Uint32(publicExponentBytes))
 	privateExponentBytes, err := base64.RawURLEncoding.DecodeString(jwk.PrivateExponentBase64)
