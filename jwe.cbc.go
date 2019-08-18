@@ -92,12 +92,12 @@ func newCBC(
 	ciphertext := make([]byte, len(plaintext))
 	mode.CryptBlocks(ciphertext, plaintext)
 	ciphertextB64 := base64.RawURLEncoding.EncodeToString(ciphertext)
-	additionalAuthenticatedData := []byte(string2ASCII(headersB64))
-	authTag := renderCBCAuthTag(additionalAuthenticatedData, iv, ciphertext, hmacKey, hashFactory)
+	authenticatedData := []byte(string2ASCII(headersB64))
+	authTag := renderCBCAuthTag(authenticatedData, iv, ciphertext, hmacKey, hashFactory)
 	authTagB64 := base64.RawURLEncoding.EncodeToString(authTag)
 	jwe := JWE{
 		ProtectedB64:                headersB64,
-		AdditionalAuthenticatedData: string(additionalAuthenticatedData),
+		AdditionalAuthenticatedData: string(authenticatedData),
 		CipherCEKB64:                cipherCEKB64,
 		InitVectorB64:               ivB64,
 		CiphertextB64:               ciphertextB64,
